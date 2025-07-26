@@ -1,11 +1,17 @@
 ---
 import "@/styles/global.css";
+import BaseLink from "@/components/BaseLink.astro";
 
 const { title } = Astro.props;
 
 // Get build info from environment variables set by GitHub Actions
-const hash = import.meta.env.COMMIT_HASH?.slice(0, 7) || "dev";
+const hash = import.meta.env.COMMIT_HASH;
 const buildDate = import.meta.env.BUILD_DATE || new Date().toISOString();
+
+const displayHash = hash?.slice(0, 7) || "dev";
+
+const repoUrl = "https://github.com/ap-1/anish.land";
+const commitUrl = hash ? `${repoUrl}/commit/${hash}` : "#";
 ---
 
 <html lang="en">
@@ -25,11 +31,10 @@ const buildDate = import.meta.env.BUILD_DATE || new Date().toISOString();
         <footer
             class="absolute bottom-4 left-4 text-xs text-gray-500 font-mono"
         >
-            commit {hash} at {buildDate} with <a
-                href="https://astro.build"
-                target="_blank"
-                class="text-blue-900 visited:text-purple-900 hover:underline"
-                >{Astro.generator}</a
+            commit <BaseLink href={commitUrl}>{displayHash}</BaseLink> at {
+                buildDate
+            } with <BaseLink href="https://astro.build"
+                >{Astro.generator}</BaseLink
             >
         </footer>
     </body>
