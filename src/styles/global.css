@@ -2,9 +2,13 @@
 
 /* iosevka-latin-400-normal */
 @font-face {
-	font-family: 'Iosevka';
-	font-style: normal;
-	font-display: swap;
-	font-weight: 400;
-	src: url(https://cdn.jsdelivr.net/fontsource/fonts/iosevka@latest/latin-400-normal.woff2) format('woff2'), url(https://cdn.jsdelivr.net/fontsource/fonts/iosevka@latest/latin-400-normal.woff) format('woff');
+    font-family: "Iosevka";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400;
+    src: url(https://cdn.jsdelivr.net/fontsource/fonts/iosevka@latest/latin-400-normal.woff2) format("woff2"), url(https://cdn.jsdelivr.net/fontsource/fonts/iosevka@latest/latin-400-normal.woff) format("woff");
+}
+
+@theme {
+    --font-mono: "Iosevka", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
