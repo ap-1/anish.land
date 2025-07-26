@@ -1,0 +1,19 @@
+{
+	"files.readonlyInclude": {
+		"bun.lock": true
+	},
+	"files.insertFinalNewline": true,
+	"typescript.preferences.importModuleSpecifier": "non-relative",
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "biomejs.biome",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.biome": "always",
+		"source.organizeImports.biome": "explicit"
+	},
+	"[astro]": {
+		"editor.defaultFormatter": "astro-build.astro-vscode"
+	},
+	"[css]": {
+		"editor.defaultFormatter": "vscode.css-language-features"
+	}
+}
