@@ -24,18 +24,24 @@ const commitUrl = hash ? `${repoUrl}/commit/${hash}` : "#";
         <title>{title}</title>
     </head>
     <body class="font-serif w-screen h-screen overflow-hidden relative">
-        <main class="flex justify-center items-center h-full w-full">
-            <slot />
-        </main>
+        <slot />
 
         <footer
-            class="absolute bottom-4 left-4 text-xs text-gray-500 font-mono"
+            class="absolute bottom-4 left-4 text-xs text-neutral-500 font-mono"
         >
-            commit <BaseLink href={commitUrl}>{displayHash}</BaseLink> at {
-                buildDate
-            } with <BaseLink href="https://astro.build"
-                >{Astro.generator}</BaseLink
+            commit <BaseLink href={commitUrl} target="_blank">
+                {displayHash}
+            </BaseLink> at {buildDate} with <BaseLink
+                href="https://astro.build"
+                target="_blank"
             >
+                {Astro.generator}
+            </BaseLink> / copyright © 2025 <BaseLink
+                href="https://github.com/ap-1"
+                target="_blank"
+            >
+                ap-1
+            </BaseLink>
         </footer>
     </body>
 </html>

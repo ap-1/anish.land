@@ -1,0 +1,30 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Keyboard from "@/components/Keyboard.astro";
+---
+
+<Layout title="anish.land">
+    <main class="min-h-dvh flex justify-center h-full w-full">
+        <div class="w-full max-w-2xl px-4 pt-12 flex flex-col gap-3 mx-auto">
+            <a href="/" id="escape-link" class="text-xs">
+                <span
+                    class="text-blue-900 visited:text-purple-900 hover:underline"
+                >
+                    [back]
+                </span>
+                &middot;
+                <Keyboard text="Esc" />
+            </a>
+
+            <slot />
+        </div>
+    </main>
+</Layout>
+
+<script is:inline>
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            document.getElementById("escape-link").click();
+        }
+    });
+</script>
