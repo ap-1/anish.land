@@ -2,20 +2,35 @@
 import "@/styles/global.css";
 
 const { title } = Astro.props;
+
+// Get build info from environment variables set by GitHub Actions
+const hash = import.meta.env.COMMIT_HASH?.slice(0, 7) || "dev";
+const buildDate = import.meta.env.BUILD_DATE || new Date().toISOString();
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/png" href="/favicon.png" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
 
-		<title>{title}</title>
-	</head>
-	<body
-		class="font-serif justify-center items-center flex w-screen h-screen overflow-hidden"
-	>
-		<slot />
-	</body>
+        <title>{title}</title>
+    </head>
+    <body class="font-serif w-screen h-screen overflow-hidden relative">
+        <main class="flex justify-center items-center h-full w-full">
+            <slot />
+        </main>
+
+        <footer
+            class="absolute bottom-4 left-4 text-xs text-gray-500 font-mono"
+        >
+            commit {hash} at {buildDate} with <a
+                href="https://astro.build"
+                target="_blank"
+                class="text-blue-900 visited:text-purple-900 hover:underline"
+                >{Astro.generator}</a
+            >
+        </footer>
+    </body>
 </html>

@@ -19,6 +19,9 @@ jobs:
 
       - name: Install, build, and upload site
         uses: withastro/action@v4
+        env:
+          COMMIT_HASH: ${{ github.sha }}
+          BUILD_DATE: ${{ github.event.head_commit.timestamp }}
 
   deploy:
     needs: build
