@@ -4,4 +4,4 @@ Personal website
 
 ## Credits
 
-Design stolen from [re-xyr](https://github.com/re-xyr)
+Home page design stolen from [re-xyr](https://github.com/re-xyr)
