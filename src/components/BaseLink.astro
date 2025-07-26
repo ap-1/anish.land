@@ -1,9 +1,11 @@
 ---
-const { href } = Astro.props;
+const { href, target } = Astro.props;
 ---
 
 <a
     href={href}
-    target="_blank"
-    class="text-blue-900 visited:text-purple-900 hover:underline"><slot /></a
+    target={target}
+    class="text-blue-900 visited:text-purple-900 hover:underline"
 >
+    <slot />
+</a>

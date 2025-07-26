@@ -6,5 +6,5 @@ const { name, href } = Astro.props;
 
 <div class="flex">
     <p class="grow font-bold">{name}</p>
-    <BaseLink href={href}><slot /></BaseLink>
+    <BaseLink href={href} target="_blank"><slot /></BaseLink>
 </div>

@@ -1,0 +1,115 @@
+---
+import Page from "@/layouts/Page.astro";
+import Keyboard from "@/components/Keyboard.astro";
+
+const links = [
+    {
+        name: "email",
+        display: "i@anish.land",
+        href: "mailto:i@anish.land",
+    },
+    {
+        name: "discord",
+        display: "@an.ish",
+        href: "https://discord.com/users/315249559473225729",
+    },
+    {
+        name: "github",
+        display: "ap-1",
+        href: "https://github.com/ap-1",
+    },
+    {
+        name: "linkedin",
+        display: "anish-pallati",
+        href: "https://www.linkedin.com/in/anish-pallati/",
+    },
+    {
+        name: "twitter",
+        display: "@anishpallati",
+        href: "https://x.com/anishpallati",
+    },
+    {
+        name: "bluesky",
+        display: "@anish.land",
+        href: "https://bsky.app/profile/anish.land",
+    },
+];
+---
+
+<Page>
+    <h1 class="text-2xl pt-4">contact</h1>
+    <p class="text-sm text-neutral-500">
+        You can reach me through any of the following channels, listed roughly
+        in order of how likely I am to respond.
+    </p>
+
+    <nav aria-label="Contact Links">
+        <ul id="link-list" class="space-y-2 pt-4">
+            {
+                links.map((link) => (
+                    <li>
+                        <a
+                            href={link.href}
+                            target="_blank"
+                            class="grid grid-cols-[8ch_1fr] items-center gap-x-2 rounded px-2 py-1 focus:outline-none focus-visible:bg-neutral-800 focus-visible:text-white hover:bg-neutral-700 hover:text-white"
+                        >
+                            <span class="font-medium text-sm text-neutral-400">
+                                {link.name}
+                            </span>
+                            <span class="truncate">{link.display}</span>
+                        </a>
+                    </li>
+                ))
+            }
+        </ul>
+    </nav>
+
+    <p class="mt-4 italic text-sm text-neutral-500">
+        use <Keyboard text="j" /> to move down, <Keyboard text="k" /> to move up,
+        and <Keyboard text="Enter" /> / <Keyboard text="LMB" /> to select
+    </p>
+
+    <script is:inline>
+        const upKeys = ["ArrowUp", "k", "w"];
+        const downKeys = ["ArrowDown", "j", "s"];
+
+        const links = document.querySelectorAll("#link-list a");
+        let lastFocusedIndex = 0;
+
+        document.addEventListener("keydown", (event) => {
+            const focused = document.activeElement;
+            const index = Array.from(links).indexOf(focused);
+
+            if (upKeys.includes(event.key)) {
+                const newIndex = (index - 1 + links.length) % links.length;
+                links[newIndex].focus();
+                lastFocusedIndex = newIndex;
+
+                event.preventDefault();
+            } else if (downKeys.includes(event.key)) {
+                const newIndex = (index + 1) % links.length;
+                links[newIndex].focus();
+                lastFocusedIndex = newIndex;
+
+                event.preventDefault();
+            } else if (event.key === "Enter" && focused?.tagName === "A") {
+                focused.click();
+            }
+        });
+
+        window.addEventListener("DOMContentLoaded", () => {
+            if (links.length > 0) {
+                links[0].focus();
+                lastFocusedIndex = 0;
+            }
+        });
+
+        document.addEventListener("mousedown", (event) => {
+            if (!event.target.closest("#link-list")) {
+                // Clicked outside, refocus last focused link
+                event.preventDefault();
+                links[lastFocusedIndex]?.focus();
+            }
+        });
+    </script>
+</Page>
