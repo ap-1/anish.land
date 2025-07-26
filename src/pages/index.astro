@@ -1,34 +1,62 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Link from "@/components/Link.astro";
+import BaseLink from "@/components/BaseLink.astro";
+import Keyboard from "@/components/Keyboard.astro";
 ---
 
 <Layout title="anish.land">
-    <div class="w-xs flex flex-col gap-3">
-        <h1 class="text-2xl h-full">anish</h1>
-        <div class="flex flex-col gap-0.5">
-            <Link name="github" href="https://github.com/ap-1">ap-1</Link>
-            <Link name="email" href="mailto:i@anish.land">i@anish.land</Link>
+    <main class="flex justify-center items-center h-full w-full">
+        <div class="w-full max-w-md px-4 flex flex-col gap-3 mx-auto">
+            <h1 class="text-2xl">anish</h1>
+            <div class="flex flex-col gap-0.5">
+                <Link name="email" href="mailto:i@anish.land">
+                    i@anish.land
+                </Link>
+                <Link name="github" href="https://github.com/ap-1">ap-1</Link>
 
-            <Link
-                name="linkedin"
-                href="https://www.linkedin.com/in/anish-pallati/"
-                text="anish-pallati">anish-pallati</Link
-            >
+                <Link name="pgp" href="/pubkey.asc">
+                    <code>
+                        2A0A 16F5 E026 BE3B A47F <br /> B7A6 841A FB68 9A5B ACCB
+                    </code>
+                </Link>
+            </div>
 
-            <Link
-                name="discord"
-                href="https://discord.com/users/315249559473225729"
-                >@an.ish</Link
-            >
+            <hr class="border-neutral-300 my-2" />
 
-            <Link name="pgp" href="/pubkey.asc">
-                <code>
-                    2A0A 16F5 E026 BE3B A47F <br /> B7A6 841A FB68 9A5B ACCB
-                </code>
-            </Link>
+            <div class="flex flex-col gap-0.5">
+                <p class="font-bold">pages</p>
+                <div
+                    class="flex flex-col gap-y-0.5 sm:flex-row sm:justify-between"
+                >
+                    <div>
+                        <BaseLink href="/about">[about]</BaseLink> &middot;
+                        <span class="text-sm"><Keyboard text="a" /></span>
+                    </div>
+
+                    <div>
+                        <BaseLink href="/contact">[contact]</BaseLink> &middot;
+                        <span class="text-sm"><Keyboard text="c" /></span>
+                    </div>
+
+                    <div>
+                        <BaseLink href="/projects">[projects]</BaseLink> &middot;
+                        <span class="text-sm"><Keyboard text="p" /></span>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <!-- <hr class="border-gray-300 my-2" /> -->
-    </div>
+    </main>
 </Layout>
+
+<script is:inline>
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "a") {
+            window.location.href = "/about";
+        } else if (event.key === "c") {
+            window.location.href = "/contact";
+        } else if (event.key === "p") {
+            window.location.href = "/projects";
+        }
+    });
+</script>
