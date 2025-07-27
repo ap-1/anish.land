@@ -12,8 +12,7 @@ import Keyboard from "@/components/Keyboard.astro";
                 >
                     [back]
                 </span>
-                &middot;
-                <Keyboard text="Esc" />
+                &middot; <Keyboard text="Esc" /> / <Keyboard text="q" />
             </a>
 
             <slot />
@@ -23,7 +22,7 @@ import Keyboard from "@/components/Keyboard.astro";
 
 <script is:inline>
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
+        if (e.key === "Escape" || e.key === "q") {
             document.getElementById("escape-link").click();
         }
     });
