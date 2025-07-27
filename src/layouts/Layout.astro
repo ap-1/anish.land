@@ -42,12 +42,20 @@ const commitUrl = hash ? `${repoUrl}/commit/${hash}` : "#";
 
 <script is:inline>
     document.addEventListener("keydown", (event) => {
-        if (event.key === "a") {
-            window.location.href = "/about";
-        } else if (event.key === "c") {
-            window.location.href = "/contact";
-        } else if (event.key === "p") {
-            window.location.href = "/projects";
+        if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) {
+            return;
+        }
+
+        switch (event.key) {
+            case "a":
+                window.location.href = "/about";
+                break;
+            case "c":
+                window.location.href = "/contact";
+                break;
+            case "p":
+                window.location.href = "/projects";
+                break;
         }
     });
 </script>
