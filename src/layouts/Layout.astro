@@ -45,3 +45,15 @@ const commitUrl = hash ? `${repoUrl}/commit/${hash}` : "#";
         </footer>
     </body>
 </html>
+
+<script is:inline>
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "a") {
+            window.location.href = "/about";
+        } else if (event.key === "c") {
+            window.location.href = "/contact";
+        } else if (event.key === "p") {
+            window.location.href = "/projects";
+        }
+    });
+</script>
