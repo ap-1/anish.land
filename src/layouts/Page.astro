@@ -23,7 +23,7 @@ import Keyboard from "@/components/Keyboard.astro";
 <script is:inline>
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" || e.key === "q") {
-            document.getElementById("escape-link").click();
+            document.getElementById("escape-link")?.click();
         }
     });
 </script>

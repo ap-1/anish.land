@@ -1,4 +1,6 @@
 ---
+import { ClientRouter } from "astro:transitions";
+
 import "@/styles/global.css";
 import Link from "@/components/Link.astro";
 
@@ -21,6 +23,7 @@ const commitUrl = hash ? `${repoUrl}/commit/${hash}` : "#";
         <meta name="viewport" content="width=device-width" />
         <meta name="generator" content={Astro.generator} />
 
+        <ClientRouter />
         <title>{title}</title>
     </head>
     <body class="font-serif w-screen h-screen overflow-hidden relative">
@@ -41,21 +44,50 @@ const commitUrl = hash ? `${repoUrl}/commit/${hash}` : "#";
 </html>
 
 <script is:inline>
+    let keyQueue = [];
+    let debounceTimeout;
+
+    function processKeyQueue() {
+        if (keyQueue.length === 0) return;
+
+        // Take the most recent intent
+        const targetUrl = keyQueue[keyQueue.length - 1];
+        keyQueue = [];
+
+        // Trigger view transition
+        const link = document.createElement("a");
+        link.href = targetUrl;
+        link.style.display = "none";
+        document.body.appendChild(link);
+
+        link.click();
+        document.body.removeChild(link);
+    }
+
     document.addEventListener("keydown", (event) => {
         if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) {
             return;
         }
 
+        let targetUrl;
         switch (event.key) {
             case "a":
-                window.location.href = "/about";
+                targetUrl = "/about";
                 break;
             case "c":
-                window.location.href = "/contact";
+                targetUrl = "/contact";
                 break;
             case "p":
-                window.location.href = "/projects";
+                targetUrl = "/projects";
                 break;
+            default:
+                return;
         }
+
+        keyQueue.push(targetUrl);
+
+        // Clear previous timeout and set new one
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(processKeyQueue, 5);
     });
 </script>

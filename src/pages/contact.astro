@@ -68,48 +68,66 @@ const links = [
         use <Keyboard text="j" /> to move down, <Keyboard text="k" /> to move up,
         and <Keyboard text="Enter" /> / <Keyboard text="LMB" /> to select
     </p>
-
-    <script is:inline>
-        const upKeys = ["ArrowUp", "k", "w"];
-        const downKeys = ["ArrowDown", "j", "s"];
-
-        const links = document.querySelectorAll("#link-list a");
-        let lastFocusedIndex = 0;
-
-        document.addEventListener("keydown", (event) => {
-            const focused = document.activeElement;
-            const index = Array.from(links).indexOf(focused);
-
-            if (upKeys.includes(event.key)) {
-                const newIndex = (index - 1 + links.length) % links.length;
-                links[newIndex].focus();
-                lastFocusedIndex = newIndex;
-
-                event.preventDefault();
-            } else if (downKeys.includes(event.key)) {
-                const newIndex = (index + 1) % links.length;
-                links[newIndex].focus();
-                lastFocusedIndex = newIndex;
-
-                event.preventDefault();
-            } else if (event.key === "Enter" && focused?.tagName === "A") {
-                focused.click();
-            }
-        });
-
-        window.addEventListener("DOMContentLoaded", () => {
-            if (links.length > 0) {
-                links[2].focus();
-                lastFocusedIndex = 2;
-            }
-        });
-
-        document.addEventListener("mousedown", (event) => {
-            if (!event.target.closest("#link-list")) {
-                // Clicked outside, refocus last focused link
-                event.preventDefault();
-                links[lastFocusedIndex]?.focus();
-            }
-        });
-    </script>
 </Page>
+
+<script is:inline>
+    const upKeys = ["ArrowUp", "k", "w"];
+    const downKeys = ["ArrowDown", "j", "s"];
+
+    const STORAGE_KEY = "contact-focus-index";
+
+    const getFocusIndex = () => {
+        // Default to GitHub link
+        return parseInt(sessionStorage.getItem(STORAGE_KEY) || "2");
+    };
+
+    const setFocusIndex = (index) => {
+        sessionStorage.setItem(STORAGE_KEY, index.toString());
+    };
+
+    document.addEventListener("keydown", (event) => {
+        // The links get replaced after view transitions
+        const links = document.querySelectorAll("#link-list a");
+        if (links.length === 0) return;
+
+        const focused = document.activeElement;
+        const index = Array.from(links).indexOf(focused);
+
+        if (upKeys.includes(event.key)) {
+            const newIndex = (index - 1 + links.length) % links.length;
+            links[newIndex].focus();
+
+            setFocusIndex(newIndex);
+            event.preventDefault();
+        } else if (downKeys.includes(event.key)) {
+            const newIndex = (index + 1) % links.length;
+            links[newIndex].focus();
+
+            setFocusIndex(newIndex);
+            event.preventDefault();
+        } else if (event.key === "Enter" && focused?.tagName === "A") {
+            focused.click();
+        }
+    });
+
+    document.addEventListener("mousedown", (event) => {
+        const links = document.querySelectorAll("#link-list a");
+        if (!event.target.closest("#link-list")) {
+            event.preventDefault();
+
+            const storedIndex = getFocusIndex();
+            links[storedIndex]?.focus();
+        }
+    });
+
+    function initializeContactNavigation() {
+        const links = document.querySelectorAll("#link-list a");
+        if (links.length === 0) return;
+
+        const focusIndex = getFocusIndex();
+        links[focusIndex]?.focus();
+    }
+
+    initializeContactNavigation();
+    document.addEventListener("astro:after-swap", initializeContactNavigation);
+</script>
