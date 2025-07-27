@@ -29,19 +29,13 @@ const commitUrl = hash ? `${repoUrl}/commit/${hash}` : "#";
         <footer
             class="absolute bottom-4 left-4 text-xs text-neutral-500 font-mono"
         >
-            commit <Link href={commitUrl} target="_blank">
-                {displayHash}
-            </Link> at {buildDate} with <Link
-                href="https://astro.build"
-                target="_blank"
-            >
-                {Astro.generator}
-            </Link> / copyright © 2025 <Link
+            commit <Link href={commitUrl} target="_blank">{displayHash}</Link> at
+            {buildDate} with <Link href="https://astro.build" target="_blank"
+                >{Astro.generator}</Link
+            > / copyright © 2025 <Link
                 href="https://github.com/ap-1"
-                target="_blank"
+                target="_blank">ap-1</Link
             >
-                ap-1
-            </Link>
         </footer>
     </body>
 </html>
