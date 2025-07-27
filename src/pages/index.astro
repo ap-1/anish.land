@@ -1,32 +1,54 @@
 ---
+import fs from "fs";
+
 import Layout from "@/layouts/Layout.astro";
 import Link from "@/components/Link.astro";
-import BaseLink from "@/components/BaseLink.astro";
+import Copy from "@/components/Copy.astro";
 import Keyboard from "@/components/Keyboard.astro";
+
+const pgp = fs.readFileSync("./public/pubkey.asc", "utf-8");
 ---
 
 <Layout title="anish.land">
     <main class="flex justify-center items-center h-full w-full">
         <div class="w-full max-w-md px-4 flex flex-col gap-3 mx-auto">
-            <h1 class="text-2xl">anish</h1>
+            <h1>
+                <span class="text-2xl">anish</span> &middot;
+                <span>అనీష్</span>
+            </h1>
+
+            <p class="text-sm text-neutral-500">
+                hi! i'm anish, a student and software engineer from new jersey.
+                i'm currently studying mathematics and computer science at
+                Carnegie Mellon University.
+            </p>
+
+            <p class="text-sm text-neutral-500">
+                i am a fan of open source, and you can find nearly all of my
+                work on my github.
+            </p>
+
+            <hr class="border-neutral-200 my-2" />
+
             <div class="flex flex-col gap-0.5">
-                <Link name="email" href="mailto:i@anish.land">
-                    i@anish.land
-                </Link>
-                <Link name="github" href="https://github.com/ap-1">ap-1</Link>
+                <Copy
+                    name="ssh"
+                    value="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDwjDM2gTgro+aN81I65BFexfLXq1u/8AJ3PmCTX5X/a i@anish.land"
+                    >ssh-ed25519 [...] i@anish.land</Copy
+                >
 
-                <Link name="ssh" href="/id_ed25519.pub">
-                    <code> ssh-ed25519 [...] i@anish.land </code>
-                </Link>
+                <Copy
+                    name="age"
+                    value="age170uyxawp784wndtsyyp33dpz53xyzggp545a6zu2a2pu4mxmv9gsq3zax7"
+                    >age170uyxawp784wndtsy[...]zax7</Copy
+                >
 
-                <Link name="pgp" href="/pubkey.asc">
-                    <code>
-                        2A0A 16F5 E026 BE3B A47F <br /> B7A6 841A FB68 9A5B ACCB
-                    </code>
-                </Link>
+                <Copy name="pgp" value={pgp}
+                    >2A0A 16F5 E026 BE3B A47F <br /> B7A6 841A FB68 9A5B ACCB</Copy
+                >
             </div>
 
-            <hr class="border-neutral-300 my-2" />
+            <hr class="border-neutral-200 my-2" />
 
             <div class="flex flex-col gap-0.5">
                 <p class="font-bold">pages</p>
@@ -34,17 +56,17 @@ import Keyboard from "@/components/Keyboard.astro";
                     class="flex flex-col gap-y-0.5 sm:flex-row sm:justify-between"
                 >
                     <div>
-                        <BaseLink href="/about">[about]</BaseLink> &middot;
+                        <Link href="/about">[about]</Link> &middot;
                         <span class="text-sm"><Keyboard text="a" /></span>
                     </div>
 
                     <div>
-                        <BaseLink href="/contact">[contact]</BaseLink> &middot;
+                        <Link href="/contact">[contact]</Link> &middot;
                         <span class="text-sm"><Keyboard text="c" /></span>
                     </div>
 
                     <div>
-                        <BaseLink href="/projects">[projects]</BaseLink> &middot;
+                        <Link href="/projects">[projects]</Link> &middot;
                         <span class="text-sm"><Keyboard text="p" /></span>
                     </div>
                 </div>

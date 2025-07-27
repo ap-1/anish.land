@@ -1,6 +1,6 @@
 ---
 import "@/styles/global.css";
-import BaseLink from "@/components/BaseLink.astro";
+import Link from "@/components/Link.astro";
 
 const { title } = Astro.props;
 
@@ -29,19 +29,19 @@ const commitUrl = hash ? `${repoUrl}/commit/${hash}` : "#";
         <footer
             class="absolute bottom-4 left-4 text-xs text-neutral-500 font-mono"
         >
-            commit <BaseLink href={commitUrl} target="_blank">
+            commit <Link href={commitUrl} target="_blank">
                 {displayHash}
-            </BaseLink> at {buildDate} with <BaseLink
+            </Link> at {buildDate} with <Link
                 href="https://astro.build"
                 target="_blank"
             >
                 {Astro.generator}
-            </BaseLink> / copyright © 2025 <BaseLink
+            </Link> / copyright © 2025 <Link
                 href="https://github.com/ap-1"
                 target="_blank"
             >
                 ap-1
-            </BaseLink>
+            </Link>
         </footer>
     </body>
 </html>

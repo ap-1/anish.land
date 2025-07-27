@@ -1,0 +1,25 @@
+---
+const { name, value } = Astro.props;
+---
+
+<div class="flex cursor-pointer group copy-link" data-value={value}>
+    <p class="grow font-bold">{name}</p>
+    <code class="text-blue-900 group-hover:underline">
+        <slot />
+    </code>
+</div>
+
+<script is:inline>
+    // Only attach once since there are multiple links
+    if (!window.__clipboardHandlerAttached) {
+        window.__clipboardHandlerAttached = true;
+
+        document.addEventListener("click", function (e) {
+            const target = e.target?.closest(".copy-link");
+            if (target?.dataset?.value) {
+                navigator.clipboard.writeText(target.dataset.value.trim());
+                alert("Copied to clipboard");
+            }
+        });
+    }
+</script>
