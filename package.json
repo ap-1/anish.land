@@ -10,16 +10,18 @@
     },
     "scripts": {
         "dev": "astro dev",
+        "dev:wrangler": "wrangler dev --config ./wrangler.jsonc --live-reload",
         "build": "COMMIT_HASH=$(git rev-parse HEAD) BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) astro build",
         "preview": "astro preview",
         "astro": "astro",
+        "generate-types": "wrangler types",
+        "type-check": "generate-types && tsc",
         "db:generate": "drizzle-kit generate --config drizzle.config.ts",
         "db:migrate": "wrangler d1 migrations apply notes-db --remote",
         "db:studio": "source .env && drizzle-kit studio --config drizzle.config.ts"
     },
     "type": "module",
     "devDependencies": {
-        "@cloudflare/workers-types": "^4.20250726.0",
         "drizzle-kit": "^0.31.4",
         "wrangler": "^4.26.0"
     }

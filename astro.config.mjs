@@ -8,6 +8,7 @@ export default defineConfig({
     adapter: cloudflare({
         platformProxy: {
             enabled: false,
+            configPath: "./wrangler.jsonc",
         }
     }),
     site: "https://anish.land",

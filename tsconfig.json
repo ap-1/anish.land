@@ -7,6 +7,9 @@
                 "src/*"
             ]
         },
+        "types": [
+            "./worker-configuration.d.ts"
+        ]
     },
     "include": [
         ".astro/types.d.ts",
