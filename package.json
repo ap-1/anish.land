@@ -9,9 +9,8 @@
     },
     "scripts": {
         "dev": "astro dev",
-        "build": "astro build",
+        "build": "COMMIT_HASH=$(git rev-parse HEAD) BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) astro build",
         "preview": "astro preview",
-        "deploy": "wrangler deploy",
         "astro": "astro"
     },
     "type": "module",

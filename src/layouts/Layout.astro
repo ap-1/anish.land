@@ -6,7 +6,7 @@ import Link from "@/components/Link.astro";
 
 const { title } = Astro.props;
 
-// Get build info from environment variables set by GitHub Actions
+// Get build info from environment variables
 const hash = import.meta.env.COMMIT_HASH;
 const buildDate = import.meta.env.BUILD_DATE || new Date().toISOString();
 
