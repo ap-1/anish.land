@@ -5,10 +5,8 @@
     "files.insertFinalNewline": true,
     "typescript.preferences.importModuleSpecifier": "non-relative",
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "biomejs.biome",
-    "editor.codeActionsOnSave": {
-        "source.fixAll.biome": "always",
-        "source.organizeImports.biome": "explicit"
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
     },
     "[astro]": {
         "editor.defaultFormatter": "astro-build.astro-vscode"
