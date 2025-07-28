@@ -1,7 +1,11 @@
 # anish.land
 
-Personal website
+My personal website
 
 ## Credits
 
-Home page design stolen from [re-xyr](https://github.com/re-xyr)
+People I got ideas from:
+
+* [re-xyr](https://github.com/re-xyr) for the minimal home page design, using Iosevka as the monospace font
+* [lilysoftpaws](https://github.com/lilysoftpaws) for the up/down/enter navigation on the contact page
+* [KokeCacao](https://github.com/KokeCacao) for having user-submitted notes on the home page
