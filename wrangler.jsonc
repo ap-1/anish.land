@@ -1,6 +1,7 @@
 {
     "name": "anish-land",
     "compatibility_date": "2025-07-28",
+    "send_metrics": false,
     "assets": {
         "directory": "./dist"
     },
