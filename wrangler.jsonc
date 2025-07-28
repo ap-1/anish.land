@@ -1,6 +1,10 @@
 {
+    "$schema": "node_modules/wrangler/config-schema.json",
     "name": "anish-land",
     "compatibility_date": "2025-07-28",
+    "observability": {
+        "enabled": true
+    },
     "send_metrics": false,
     "assets": {
         "directory": "./dist"
