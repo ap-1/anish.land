@@ -1,12 +1,12 @@
 ---
-import fs from "fs";
-
 import Layout from "@/layouts/Layout.astro";
 import Link from "@/components/Link.astro";
 import Copy from "@/components/Copy.astro";
 import Keyboard from "@/components/Keyboard.astro";
 
-const pgp = fs.readFileSync("./public/pubkey.asc", "utf-8");
+import pgp from "@/data/pubkey.asc?raw";
+
+export const prerender = false;
 ---
 
 <Layout title="anish.land">
@@ -73,4 +73,103 @@ const pgp = fs.readFileSync("./public/pubkey.asc", "utf-8");
             </div>
         </div>
     </main>
+
+    <div id="notes-container" class="fixed inset-0 pointer-events-none z-10">
+        <!-- Notes will be rendered here -->
+    </div>
+
+    <!-- Inline note input -->
+    <input
+        id="note-input"
+        type="text"
+        class="fixed hidden z-20 pointer-events-auto bg-transparent border-none outline-none text-xs text-gray-600 placeholder-gray-400 w-32"
+        maxlength="50"
+        placeholder="Write your note here..."
+    />
 </Layout>
+
+<script is:inline>
+    // Load and display approved notes
+    async function loadNotes() {
+        try {
+            const response = await fetch("/api/notes");
+            const notes = await response.json();
+
+            const container = document.getElementById("notes-container");
+            container.innerHTML = "";
+
+            notes.forEach((note) => {
+                const noteEl = document.createElement("div");
+                noteEl.className =
+                    "absolute pointer-events-auto bg-yellow-100 border border-yellow-300 p-2 rounded shadow-sm text-xs max-w-xs";
+                noteEl.style.left = `${note.x}px`;
+                noteEl.style.top = `${note.y}px`;
+                noteEl.textContent = note.content;
+                container.appendChild(noteEl);
+            });
+        } catch (error) {
+            console.error("Failed to load notes:", error);
+        }
+    }
+
+    let clickX, clickY;
+    const input = document.getElementById("note-input");
+
+    // Click anywhere to create note
+    document.addEventListener("click", (e) => {
+        // Don't create note if clicking on interactive elements
+        if (e.target.closest("a, button, input, textarea, #notes-container")) {
+            return;
+        }
+
+        clickX = e.clientX;
+        clickY = e.clientY;
+
+        input.style.left = `${clickX}px`;
+        input.style.top = `${clickY}px`;
+        input.classList.remove("hidden");
+        input.focus();
+    });
+
+    function finish() {
+        input.value = "";
+        input.classList.add("hidden");
+    }
+
+    // Submit on Enter, cancel on Escape
+    input.addEventListener("keydown", async (e) => {
+        if (e.key === "Enter") {
+            const content = input.value.trim();
+            if (!content) return;
+
+            try {
+                const response = await fetch("/api/notes", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        content,
+                        x: clickX,
+                        y: clickY,
+                    }),
+                });
+
+                if (response.ok) {
+                    finish();
+                    alert("Note submitted for approval");
+                } else {
+                    alert("Failed to submit note");
+                }
+            } catch (error) {
+                alert("Error submitting note");
+            }
+        } else if (e.key === "Escape") {
+            finish();
+        }
+    });
+
+    // Hide input when clicking elsewhere
+    input.addEventListener("blur", finish);
+
+    // Load notes on page load
+    loadNotes();
+</script>
