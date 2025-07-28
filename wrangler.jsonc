@@ -1,4 +1,9 @@
 {
+    "name": "anish-land",
+    "compatibility_date": "2025-07-28",
+    "assets": {
+        "directory": "./dist"
+    },
     "d1_databases": [
         {
             "binding": "DB",
