@@ -5,7 +5,11 @@ import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
-    adapter: cloudflare(),
+    adapter: cloudflare({
+        platformProxy: {
+            enabled: false,
+        }
+    }),
     site: "https://anish.land",
     vite: {
         plugins: [tailwindcss()],
