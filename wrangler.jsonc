@@ -1,0 +1,9 @@
+{
+    "d1_databases": [
+        {
+            "binding": "DB",
+            "database_name": "notes-db",
+            "database_id": "e9ca26c3-af8a-48fb-831e-1b2cc92af32b"
+        }
+    ]
+}
