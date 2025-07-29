@@ -10,6 +10,14 @@ export const prerender = false;
 ---
 
 <Layout title="anish.land">
+    <div
+        id="notes-toggle"
+        class="fixed top-4 right-4 z-30 text-xs cursor-pointer"
+    >
+        <span class="text-blue-900 hover:underline"> [hide notes] </span>
+        &middot; <Keyboard text="n" />
+    </div>
+
     <main class="flex justify-center items-center h-full w-full">
         <div class="w-full max-w-md px-4 flex flex-col gap-3 mx-auto">
             <h1>
@@ -79,32 +87,101 @@ export const prerender = false;
     </div>
 
     <!-- Inline note input -->
-    <input
-        id="note-input"
-        type="text"
-        class="fixed hidden z-20 pointer-events-auto bg-transparent border-none outline-none text-xs text-gray-600 placeholder-gray-400 w-32"
-        maxlength="50"
-        placeholder="Write your note here..."
-    />
+    <div
+        id="note-input-container"
+        class="fixed hidden z-20 pointer-events-auto"
+    >
+        <input
+            id="note-input"
+            type="text"
+            class="bg-transparent border-none outline-none text-xs text-neutral-500 placeholder-neutral-300 w-32 block"
+            maxlength="50"
+            placeholder="Write your note here..."
+        />
+        <div class="flex gap-2 mt-1">
+            <button id="note-cancel" class="text-xs">
+                <Keyboard text="Esc" />
+            </button>
+            <button id="note-submit" class="text-xs">
+                <Keyboard text="Enter" />
+            </button>
+        </div>
+    </div>
 </Layout>
 
 <script is:inline>
-    // Load and display approved notes
-    async function loadNotes() {
-        try {
-            const response = await fetch("/api/notes");
-            const notes = await response.json();
+    function getNotesEnabled() {
+        return localStorage.getItem("notesEnabled") !== "false";
+    }
 
-            const container = document.getElementById("notes-container");
+    function setNotesEnabled(enabled) {
+        localStorage.setItem("notesEnabled", enabled.toString());
+    }
+
+    function getPendingNotes() {
+        try {
+            return JSON.parse(localStorage.getItem("pendingNotes") || "[]");
+        } catch {
+            return [];
+        }
+    }
+
+    function savePendingNote(note) {
+        const pending = getPendingNotes();
+        pending.push(note);
+        localStorage.setItem("pendingNotes", JSON.stringify(pending));
+    }
+
+    async function loadNotes() {
+        const container = document.getElementById("notes-container");
+
+        if (!getNotesEnabled()) {
+            container.innerHTML = "";
+            return;
+        }
+
+        try {
+            // Get approved notes from server
+            const response = await fetch("/api/notes");
+            const approvedNotes = await response.json();
+
+            // Get pending notes from localStorage
+            const pendingNotes = getPendingNotes();
+
+            // Remove pending notes that are now approved
+            const approvedIds = new Set(approvedNotes.map((note) => note.id));
+            const stillPending = pendingNotes.filter(
+                (note) => !approvedIds.has(note.id),
+            );
+
+            // Update localStorage if any pending notes were approved
+            if (stillPending.length !== pendingNotes.length) {
+                localStorage.setItem(
+                    "pendingNotes",
+                    JSON.stringify(stillPending),
+                );
+            }
+
             container.innerHTML = "";
 
-            notes.forEach((note) => {
+            // Render notes
+            approvedNotes.forEach((note) => {
                 const noteEl = document.createElement("div");
                 noteEl.className =
-                    "absolute pointer-events-auto bg-yellow-100 border border-yellow-300 p-2 rounded shadow-sm text-xs max-w-xs";
+                    "absolute pointer-events-auto bg-transparent border-none outline-none text-xs text-neutral-300 max-w-xs";
                 noteEl.style.left = `${note.x}px`;
                 noteEl.style.top = `${note.y}px`;
                 noteEl.textContent = note.content;
+                container.appendChild(noteEl);
+            });
+
+            stillPending.forEach((note) => {
+                const noteEl = document.createElement("div");
+                noteEl.className =
+                    "absolute pointer-events-auto bg-transparent border-none outline-none text-xs text-neutral-300 max-w-xs italic";
+                noteEl.style.left = `${note.x}px`;
+                noteEl.style.top = `${note.y}px`;
+                noteEl.textContent = `${note.content} (pending)`;
                 container.appendChild(noteEl);
             });
         } catch (error) {
@@ -112,33 +189,64 @@ export const prerender = false;
         }
     }
 
-    let clickX, clickY;
-    const input = document.getElementById("note-input");
+    function initializeNotes() {
+        let clickX, clickY;
+        let isInputActive = false;
 
-    // Click anywhere to create note
-    document.addEventListener("click", (e) => {
-        // Don't create note if clicking on interactive elements
-        if (e.target.closest("a, button, input, textarea, #notes-container")) {
-            return;
+        const inputContainer = document.getElementById("note-input-container");
+        const input = document.getElementById("note-input");
+        const submitBtn = document.getElementById("note-submit");
+        const cancelBtn = document.getElementById("note-cancel");
+
+        const toggleBtn = document.getElementById("notes-toggle");
+        const toggleSpan = toggleBtn.querySelector("span");
+
+        if (!input) return;
+
+        toggleSpan.textContent = getNotesEnabled()
+            ? "[hide notes]"
+            : "[show notes]";
+
+        // Click anywhere to create note
+        document.addEventListener("click", (e) => {
+            // Don't create notes if notes are disabled
+            if (!getNotesEnabled()) {
+                return;
+            }
+
+            // If input is currently active, cancel it
+            if (isInputActive) {
+                finish();
+                return;
+            }
+
+            // Don't create note if clicking on interactive elements
+            if (
+                e.target.closest(
+                    "a, button, input, textarea, #notes-toggle, #notes-container",
+                )
+            ) {
+                return;
+            }
+
+            clickX = e.clientX;
+            clickY = e.clientY;
+
+            inputContainer.style.left = `${clickX}px`;
+            inputContainer.style.top = `${clickY}px`;
+            inputContainer.classList.remove("hidden");
+            input.focus();
+
+            isInputActive = true;
+        });
+
+        function finish() {
+            input.value = "";
+            inputContainer.classList.add("hidden");
+            isInputActive = false;
         }
 
-        clickX = e.clientX;
-        clickY = e.clientY;
-
-        input.style.left = `${clickX}px`;
-        input.style.top = `${clickY}px`;
-        input.classList.remove("hidden");
-        input.focus();
-    });
-
-    function finish() {
-        input.value = "";
-        input.classList.add("hidden");
-    }
-
-    // Submit on Enter, cancel on Escape
-    input.addEventListener("keydown", async (e) => {
-        if (e.key === "Enter") {
+        async function submit() {
             const content = input.value.trim();
             if (!content) return;
 
@@ -154,22 +262,57 @@ export const prerender = false;
                 });
 
                 if (response.ok) {
+                    const result = await response.json();
+                    savePendingNote({
+                        id: result.id,
+                        content: content,
+                        x: clickX,
+                        y: clickY,
+                    });
+
+                    // Show the new pending note
                     finish();
-                    alert("Note submitted for approval");
+                    loadNotes();
+
+                    // Make sure the input container is hidden before alerting
+                    setTimeout(() => alert("Note submitted for approval"), 0);
                 } else {
                     alert("Failed to submit note");
                 }
             } catch (error) {
                 alert("Error submitting note");
             }
-        } else if (e.key === "Escape") {
-            finish();
         }
-    });
 
-    // Hide input when clicking elsewhere
-    input.addEventListener("blur", finish);
+        // Submit on Enter, cancel on Escape
+        input.addEventListener("keydown", async (e) => {
+            if (e.key === "Enter") {
+                await submit();
+            } else if (e.key === "Escape") {
+                finish();
+            }
+        });
 
-    // Load notes on page load
-    loadNotes();
+        submitBtn.addEventListener("click", submit);
+        cancelBtn.addEventListener("click", finish);
+        toggleBtn.addEventListener("click", () => {
+            const enabled = !getNotesEnabled();
+            toggleSpan.textContent = enabled ? "[hide notes]" : "[show notes]";
+
+            setNotesEnabled(enabled);
+
+            if (!enabled) {
+                // Hide any active input
+                finish();
+            }
+
+            // Reload notes
+            loadNotes();
+        });
+
+        loadNotes();
+    }
+
+    initializeNotes();
+    document.addEventListener("astro:after-swap", initializeNotes);
 </script>
