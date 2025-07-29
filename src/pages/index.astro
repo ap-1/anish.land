@@ -224,7 +224,7 @@ import pgp from "@/data/pubkey.asc?raw";
             // Don't create note if clicking on interactive elements
             if (
                 e.target.closest(
-                    "a, button, input, textarea, #notes-toggle, #notes-container",
+                    "a, button, input, code, textarea, #notes-toggle, #notes-container",
                 )
             ) {
                 return;
