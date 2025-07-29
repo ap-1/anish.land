@@ -76,6 +76,18 @@ const commitUrl = hash ? `${repoUrl}/commit/${hash}` : "#";
             return;
         }
 
+        // Don't trigger navigation if user is typing in an input/textarea
+        if (
+            event.target.tagName === "INPUT" ||
+            event.target.tagName === "TEXTAREA"
+        ) {
+            return;
+        }
+
+        if (event.repeat) {
+            return; // Ignore repeated key presses
+        }
+
         let targetUrl;
         switch (event.key) {
             case "a":
