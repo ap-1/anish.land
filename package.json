@@ -4,8 +4,8 @@
     "dependencies": {
         "@astrojs/cloudflare": "^12.6.0",
         "@tailwindcss/vite": "^4.1.11",
-        "astro": "^5.12.3",
-        "drizzle-orm": "^0.44.3",
+        "astro": "^5.12.5",
+        "drizzle-orm": "^0.44.4",
         "tailwindcss": "^4.1.11"
     },
     "scripts": {
@@ -23,6 +23,6 @@
     "type": "module",
     "devDependencies": {
         "drizzle-kit": "^0.31.4",
-        "wrangler": "^4.26.0"
+        "wrangler": "^4.26.1"
     }
 }
