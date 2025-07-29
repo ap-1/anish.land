@@ -46,18 +46,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
         const db = drizzle(locals.runtime.env.DB);
 
-        await db.insert(notes).values({
-            content: content.trim(),
-            x: Math.round(x),
-            y: Math.round(y),
-            // Client IP address connecting to Cloudflare to the origin web server
-            ipAddress: request.headers.get("CF-Connecting-IP"),
-            userAgent: request.headers.get("User-Agent"),
-        });
+        const result = await db
+            .insert(notes)
+            .values({
+                content: content.trim(),
+                x: Math.round(x),
+                y: Math.round(y),
+                // Client IP address connecting to Cloudflare to the origin web server
+                ipAddress: request.headers.get("CF-Connecting-IP"),
+                userAgent: request.headers.get("User-Agent"),
+            })
+            .returning({ id: notes.id });
 
         return new Response(JSON.stringify({
             success: true,
-            message: "Note submitted for approval"
+            message: "Note submitted for approval",
+            id: result[0].id
         }), {
             status: 201,
             headers: { "Content-Type": "application/json" },
