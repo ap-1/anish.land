@@ -2,13 +2,14 @@
     "$schema": "node_modules/wrangler/config-schema.json",
     "name": "anish-land",
     "compatibility_date": "2025-07-28",
+    "main": "./dist/_worker.js",
+    "assets": {
+        "directory": "./dist",
+    },
     "observability": {
         "enabled": true
     },
     "send_metrics": false,
-    "assets": {
-        "directory": "./dist"
-    },
     "d1_databases": [
         {
             "binding": "DB",
