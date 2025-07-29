@@ -15,6 +15,3 @@ export const notes = sqliteTable("notes", {
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
 });
-
-export type Note = typeof notes.$inferSelect;
-export type NewNote = typeof notes.$inferInsert;
