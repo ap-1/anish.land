@@ -1,12 +1,12 @@
 import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const notes = sqliteTable("notes", {
     id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
     content: text("content").notNull(),
-    x: integer("x").notNull(),
-    y: integer("y").notNull(),
-    status: text("status", { enum: ["pending", "approved", "rejected"] })
+    xPercent: real("x_percent").notNull(),
+    yPercent: real("y_percent").notNull(),
+    status: text("status", { enum: ["pending", "approved"] })
         .notNull()
         .default("pending"),
     createdAt: integer("created_at", { mode: "timestamp" })
