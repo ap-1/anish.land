@@ -99,6 +99,17 @@ const commitUrl = hash ? `${repoUrl}/commit/${hash}` : "#";
             case "p":
                 targetUrl = "/projects";
                 break;
+            case "n":
+                // Toggle notes on home page only
+                if (window.location.pathname === "/") {
+                    const toggleBtn = document.getElementById("notes-toggle");
+                    if (toggleBtn) {
+                        toggleBtn.click();
+                    }
+                }
+
+                // Don't navigate anywhere
+                return;
             default:
                 return;
         }
