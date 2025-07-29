@@ -10,7 +10,7 @@
     },
     "scripts": {
         "dev": "astro dev",
-        "dev:wrangler": "wrangler dev --config ./wrangler.jsonc --live-reload",
+        "dev:wrangler": "astro build && wrangler dev --x-remote-bindings --config ./wrangler.jsonc",
         "build": "COMMIT_HASH=$(git rev-parse HEAD) BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) astro build",
         "preview": "astro preview",
         "astro": "astro",

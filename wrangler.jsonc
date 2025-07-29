@@ -14,7 +14,8 @@
             "binding": "DB",
             "database_name": "notes-db",
             "database_id": "e9ca26c3-af8a-48fb-831e-1b2cc92af32b",
-            "migrations_dir": "./src/db/migrations"
+            "migrations_dir": "./src/db/migrations",
+            "experimental_remote": true
         }
     ]
 }
