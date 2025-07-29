@@ -164,13 +164,16 @@ export const prerender = false;
 
             container.innerHTML = "";
 
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+
             // Render notes
             approvedNotes.forEach((note) => {
                 const noteEl = document.createElement("div");
                 noteEl.className =
                     "absolute pointer-events-auto bg-transparent border-none outline-none text-xs text-neutral-300 max-w-xs";
-                noteEl.style.left = `${note.x}px`;
-                noteEl.style.top = `${note.y}px`;
+                noteEl.style.left = `${note.xPercent * screenWidth}px`;
+                noteEl.style.top = `${note.yPercent * screenHeight}px`;
                 noteEl.textContent = note.content;
                 container.appendChild(noteEl);
             });
@@ -179,8 +182,8 @@ export const prerender = false;
                 const noteEl = document.createElement("div");
                 noteEl.className =
                     "absolute pointer-events-auto bg-transparent border-none outline-none text-xs text-neutral-300 max-w-xs italic";
-                noteEl.style.left = `${note.x}px`;
-                noteEl.style.top = `${note.y}px`;
+                noteEl.style.left = `${note.xPercent * screenWidth}px`;
+                noteEl.style.top = `${note.yPercent * screenHeight}px`;
                 noteEl.textContent = `${note.content} (pending)`;
                 container.appendChild(noteEl);
             });
@@ -250,6 +253,9 @@ export const prerender = false;
             const content = input.value.trim();
             if (!content) return;
 
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+
             try {
                 const response = await fetch("/api/notes", {
                     method: "POST",
@@ -258,6 +264,8 @@ export const prerender = false;
                         content,
                         x: clickX,
                         y: clickY,
+                        screenWidth,
+                        screenHeight,
                     }),
                 });
 
@@ -266,8 +274,8 @@ export const prerender = false;
                     savePendingNote({
                         id: result.id,
                         content: content,
-                        x: clickX,
-                        y: clickY,
+                        xPercent: clickX / screenWidth,
+                        yPercent: clickY / screenHeight,
                     });
 
                     // Show the new pending note
@@ -309,6 +317,9 @@ export const prerender = false;
             // Reload notes
             loadNotes();
         });
+
+        // Adjust notes on window resize
+        window.addEventListener("resize", loadNotes);
 
         loadNotes();
     }

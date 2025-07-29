@@ -14,8 +14,8 @@ export const GET: APIRoute = async ({ locals }) => {
             .select({
                 id: notes.id,
                 content: notes.content,
-                x: notes.x,
-                y: notes.y,
+                xPercent: notes.xPercent,
+                yPercent: notes.yPercent,
                 createdAt: notes.createdAt,
             })
             .from(notes)
@@ -35,7 +35,13 @@ export const GET: APIRoute = async ({ locals }) => {
 
 export const POST: APIRoute = async ({ request, locals }) => {
     try {
-        const { content, x, y } = await request.json() as { content: string; x: number; y: number };
+        const { content, x, y, screenWidth, screenHeight } = await request.json() as {
+            content: string;
+            x: number;
+            y: number;
+            screenWidth: number;
+            screenHeight: number;
+        };
 
         if (!content?.trim()) {
             return new Response(JSON.stringify({ error: "Content required" }), {
@@ -50,8 +56,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
             .insert(notes)
             .values({
                 content: content.trim(),
-                x: Math.round(x),
-                y: Math.round(y),
+                xPercent: x / screenWidth,
+                yPercent: y / screenHeight,
                 // Client IP address connecting to Cloudflare to the origin web server
                 ipAddress: request.headers.get("CF-Connecting-IP"),
                 userAgent: request.headers.get("User-Agent"),
