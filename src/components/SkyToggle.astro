@@ -1,0 +1,26 @@
+<button id="sky-toggle" class="sky-toggle" type="button" aria-label="switch between day and night"></button>
+
+<script>
+    import { toggleTheme } from "@/lib/theme";
+
+    document.getElementById("sky-toggle")!.addEventListener("click", toggleTheme);
+</script>
+
+<style>
+    .sky-toggle {
+        position: absolute;
+        z-index: 4;
+        width: 0;
+        height: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: none;
+        cursor: pointer;
+    }
+
+    .sky-toggle:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 2px;
+    }
+</style>

@@ -3,14 +3,12 @@
     "version": "0.0.1",
     "dependencies": {
         "@astrojs/cloudflare": "^12.6.0",
-        "@tailwindcss/vite": "^4.1.11",
         "astro": "^5.12.5",
-        "drizzle-orm": "^0.44.4",
-        "tailwindcss": "^4.1.11"
+        "drizzle-orm": "^0.44.4"
     },
     "scripts": {
         "dev": "astro dev",
-        "dev:wrangler": "astro build && wrangler dev --x-remote-bindings --config ./wrangler.jsonc",
+        "dev:wrangler": "astro build && wrangler dev --config ./wrangler.jsonc",
         "build": "COMMIT_HASH=$(git rev-parse HEAD) BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) astro build",
         "preview": "astro preview",
         "astro": "astro",
@@ -18,11 +16,13 @@
         "type-check": "generate-types && tsc",
         "db:generate": "drizzle-kit generate --config drizzle.config.ts",
         "db:migrate": "wrangler d1 migrations apply notes-db --remote",
-        "db:studio": "source .env && drizzle-kit studio --config drizzle.config.ts"
+        "db:studio": "deno run -A --env-file=.env npm:drizzle-kit studio --config drizzle.config.ts"
     },
     "type": "module",
     "devDependencies": {
+        "@types/node": "^24.19.2",
         "drizzle-kit": "^0.31.4",
-        "wrangler": "^4.26.1"
+        "typescript": "^6",
+        "wrangler": "^4.158.0"
     }
 }

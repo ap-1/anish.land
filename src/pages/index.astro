@@ -1,327 +1,635 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import Link from "@/components/Link.astro";
-import Copy from "@/components/Copy.astro";
-import Keyboard from "@/components/Keyboard.astro";
+import Footer from "@/components/Footer.astro";
+import SkyToggle from "@/components/SkyToggle.astro";
+import { getContributionYear, getHomeColumns } from "@/lib/content";
 
-import pgp from "@/data/pubkey.asc?raw";
+export const prerender = false;
+
+const db = Astro.locals.runtime.env.DB;
+const [columns, year] = await Promise.all([getHomeColumns(db), getContributionYear(db)]);
+
+const LOOP_SECONDS = [96, 130];
+
+const HI = [
+    { name: "email", href: "mailto:i@anish.land", odds: 3 },
+    { name: "discord", href: "https://discord.com/users/315249559473225729", odds: 3 },
+    { name: "github", href: "https://github.com/ap-1", odds: 2 },
+    { name: "twitter", href: "https://x.com/anishpallati", odds: 2 },
+    { name: "matrix", href: "https://matrix.to/#/@ap-1:matrix.org", odds: 2 },
+    { name: "linkedin", href: "https://www.linkedin.com/in/anish-pallati/", odds: 1 },
+    { name: "bluesky", href: "https://bsky.app/profile/anish.land", odds: 1 },
+];
+const ODDS_WORDS = ["", "rarely checked", "slow reply", "fast reply"];
+const BAR_HEIGHTS = [4, 7, 10];
 ---
 
 <Layout title="anish.land">
-    <div
-        id="notes-toggle"
-        class="fixed top-4 right-4 z-30 text-xs cursor-pointer"
-    >
-        <span class="text-blue-900 hover:underline"> [hide notes] </span>
-        &middot; <Keyboard text="n" />
-    </div>
+    <div id="page" class="page">
+        <canvas id="birds" class="birds" aria-hidden="true"></canvas>
 
-    <main class="flex justify-center items-center h-full w-full">
-        <div class="w-full max-w-md px-4 flex flex-col gap-3 mx-auto">
-            <h1>
-                <span class="text-2xl">anish</span> &middot;
-                <span>అనీష్</span>
-            </h1>
-
-            <p class="text-sm text-neutral-500">
-                hi! i'm anish, a student and software engineer from new jersey.
-                i'm currently studying mathematics at carnegie mellon
-                university.
-            </p>
-
-            <p class="text-sm text-neutral-500">
-                i am a fan of open source, and you can find nearly all of my
-                work on github&mdash;press <Keyboard text="c" />!
-            </p>
-
-            <hr class="border-neutral-200 my-2" />
-
-            <div class="flex flex-col gap-0.5">
-                <Copy
-                    name="ssh"
-                    value="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDwjDM2gTgro+aN81I65BFexfLXq1u/8AJ3PmCTX5X/a i@anish.land"
-                    >ssh-ed25519 [...] i@anish.land</Copy
-                >
-
-                <Copy
-                    name="age"
-                    value="age170uyxawp784wndtsyyp33dpz53xyzggp545a6zu2a2pu4mxmv9gsq3zax7"
-                    >age170uyxawp784wndtsy[...]zax7</Copy
-                >
-
-                <Copy name="pgp" value={pgp}
-                    >2A0A 16F5 E026 BE3B A47F <br /> B7A6 841A FB68 9A5B ACCB</Copy
-                >
-            </div>
-
-            <hr class="border-neutral-200 my-2" />
-
-            <div class="flex flex-col gap-0.5">
-                <p class="font-bold">pages</p>
-                <div
-                    class="flex flex-col gap-y-0.5 sm:flex-row sm:justify-between"
-                >
-                    <div>
-                        <Link href="/about">[about]</Link> &middot;
-                        <span class="text-sm"><Keyboard text="a" /></span>
+        <section aria-label="Recent activity" class="cols">
+            {
+                columns.map((column, i) => (
+                    <div class="col">
+                        <div
+                            class="track"
+                            style={`animation-duration: ${LOOP_SECONDS[i]}s; animation-direction: ${i === 1 ? "reverse" : "normal"}`}
+                        >
+                            {[...column, ...column, ...column].map((card, n) =>
+                                card.kind === "pr" ? (
+                                    <a
+                                        href={card.url}
+                                        target="_blank"
+                                        class="card pr-art"
+                                        style={`--art-light: url("${card.art.light}"); --art-dark: url("${card.art.dark}")`}
+                                    >
+                                        <div class="pr-state">
+                                            {card.state === "merged" ? (
+                                                <svg class="merged" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <circle cx="18" cy="18" r="3" />
+                                                    <circle cx="6" cy="6" r="3" />
+                                                    <path d="M6 21V9a9 9 0 0 0 9 9" />
+                                                </svg>
+                                            ) : (
+                                                <svg class="open" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <circle cx="18" cy="18" r="3" />
+                                                    <circle cx="6" cy="6" r="3" />
+                                                    <path d="M13 6h3a2 2 0 0 1 2 2v7" />
+                                                    <line x1="6" y1="9" x2="6" y2="21" />
+                                                </svg>
+                                            )}
+                                            <span>
+                                                {card.state === "merged" ? "merged" : "opened"} {card.date}
+                                            </span>
+                                        </div>
+                                        <div class="card-title pr-title">{card.title}</div>
+                                        <div class="pr-meta">
+                                            <span class="pr-ref">
+                                                {card.repo} #{card.number}
+                                            </span>
+                                            <span class="pr-diff">
+                                                <span class="add">+{card.additions}</span>{" "}
+                                                {card.deletions > 0 && <span class="del">&minus;{card.deletions}</span>}
+                                            </span>
+                                        </div>
+                                    </a>
+                                ) : (
+                                    <a href={card.url} target="_blank" class={`card scene-${((n % column.length) * 3 + i * 5) % 20}`}>
+                                        <div class="label">project</div>
+                                        <div class="card-title project-name">{card.name}</div>
+                                        <div class="project-desc">{card.description}</div>
+                                    </a>
+                                ),
+                            )}
+                        </div>
                     </div>
+                ))
+            }
+        </section>
 
-                    <div>
-                        <Link href="/contact">[contact]</Link> &middot;
-                        <span class="text-sm"><Keyboard text="c" /></span>
-                    </div>
+        <SkyToggle />
+        <a
+            id="mail"
+            class="mail"
+            href="/postcards"
+            data-key="c"
+            aria-keyshortcuts="c"
+            aria-label="leave a message (postcards)"></a>
+        <div id="mailnote" class="mailnote" aria-hidden="true">
+            <svg width="70" height="44" viewBox="0 0 70 44">
+                <path d="M66 27 C 58 26, 50 24, 45 21 C 34 15, 31 2, 40 2 C 51 2, 49 19, 35 24 C 26 27, 16 29, 6 31" />
+                <path d="M6 31 l 7.9 1.3 M6 31 l 5.1 -6.2" />
+            </svg>
+            <span>leave a message</span><kbd>c</kbd>
+        </div>
+        <div id="tip" class="tip" hidden></div>
 
-                    <div>
-                        <Link href="/projects">[projects]</Link> &middot;
-                        <span class="text-sm"><Keyboard text="p" /></span>
-                    </div>
+        <Footer ground />
+
+        <main class="main">
+            <div class="intro">
+                <h1 class="heading">
+                    <span class="name" data-perch="text">anish</span>
+                    <span class="telugu">&#xC05;&#xC28;&#xC40;&#xC37;&#xC4D;</span>
+                </h1>
+                <p class="bio" data-perch="text">
+                    hi! i'm anish, a software engineer studying mathematics at carnegie mellon university. i'm a big fan of open
+                    source.
+                </p>
+                <div class="say">
+                    <span>say hi</span>
+                    {
+                        HI.map((link) => (
+                            <a class="hi" href={link.href} target="_blank" title={ODDS_WORDS[link.odds]}>
+                                <span>{link.name}</span>
+                                <span class="bars" aria-hidden="true">
+                                    {BAR_HEIGHTS.map((h, b) => (
+                                        <span class:list={["bar", { "bar-on": b < link.odds }]} style={`height: ${h}px`} />
+                                    ))}
+                                </span>
+                            </a>
+                        ))
+                    }
                 </div>
+                <nav aria-label="Pages" class="pages">
+                    <a class="nav" data-key="p" href="/projects" aria-keyshortcuts="p"><span class="nav-label">projects</span><kbd data-perch="box">p</kbd></a>
+                    <a class="nav" data-key="v" href="/verify" aria-keyshortcuts="v"><span class="nav-label">verify</span><kbd data-perch="box">v</kbd></a>
+                </nav>
             </div>
-        </div>
-    </main>
-
-    <div id="notes-container" class="fixed inset-0 pointer-events-none z-10">
-        <!-- Notes will be rendered here -->
+        </main>
     </div>
 
-    <!-- Inline note input -->
-    <div
-        id="note-input-container"
-        class="fixed hidden z-20 pointer-events-auto"
-    >
-        <input
-            id="note-input"
-            type="text"
-            class="bg-transparent border-none outline-none text-xs text-neutral-500 placeholder-neutral-300 w-32 block"
-            maxlength="50"
-            placeholder="Write your note here..."
-        />
-        <div class="flex gap-2 mt-1">
-            <button id="note-cancel" class="text-xs">
-                <Keyboard text="Esc" />
-            </button>
-            <button id="note-submit" class="text-xs">
-                <Keyboard text="Enter" />
-            </button>
-        </div>
-    </div>
+    <script id="year" type="application/json" set:html={JSON.stringify(year)} />
 </Layout>
 
-<script is:inline>
-    function getNotesEnabled() {
-        return localStorage.getItem("notesEnabled") !== "false";
+<script>
+    import { PageBirds } from "@/lib/birds";
+    import type { ContributionDay } from "@/lib/github";
+
+    const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+    const TIP_HALF_WIDTH = 90;
+
+    const page = document.getElementById("page")!;
+    const canvas = document.getElementById("birds") as HTMLCanvasElement;
+    const mail = document.getElementById("mail")!;
+    const note = document.getElementById("mailnote")!;
+    const tip = document.getElementById("tip")!;
+    const year: ContributionDay[] = JSON.parse(document.getElementById("year")!.textContent!);
+
+    function contributionText({ date, count }: ContributionDay) {
+        const [, month, day] = date.split("-").map(Number);
+        const contributions = count === 0 ? "no contributions" : count === 1 ? "1 contribution" : `${count} contributions`;
+        return `${MONTHS[month - 1]} ${day}, ${contributions}`;
     }
 
-    function setNotesEnabled(enabled) {
-        localStorage.setItem("notesEnabled", enabled.toString());
-    }
-
-    function getPendingNotes() {
-        try {
-            return JSON.parse(localStorage.getItem("pendingNotes") || "[]");
-        } catch {
-            return [];
-        }
-    }
-
-    function savePendingNote(note) {
-        const pending = getPendingNotes();
-        pending.push(note);
-        localStorage.setItem("pendingNotes", JSON.stringify(pending));
-    }
-
-    async function loadNotes() {
-        const container = document.getElementById("notes-container");
-
-        if (!getNotesEnabled()) {
-            container.innerHTML = "";
-            return;
-        }
-
-        try {
-            // Get approved notes from server
-            const response = await fetch("/api/notes");
-            const approvedNotes = await response.json();
-
-            // Get pending notes from localStorage
-            const pendingNotes = getPendingNotes();
-
-            // Remove pending notes that are now approved
-            const approvedIds = new Set(approvedNotes.map((note) => note.id));
-            const stillPending = pendingNotes.filter(
-                (note) => !approvedIds.has(note.id),
-            );
-
-            // Update localStorage if any pending notes were approved
-            if (stillPending.length !== pendingNotes.length) {
-                localStorage.setItem(
-                    "pendingNotes",
-                    JSON.stringify(stillPending),
-                );
-            }
-
-            container.innerHTML = "";
-
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
-
-            // Render notes
-            approvedNotes.forEach((note) => {
-                const noteEl = document.createElement("div");
-                noteEl.className =
-                    "absolute pointer-events-auto bg-transparent border-none outline-none text-xs text-neutral-300 max-w-xs";
-                noteEl.style.left = `${note.xPercent * screenWidth}px`;
-                noteEl.style.top = `${note.yPercent * screenHeight}px`;
-                noteEl.textContent = note.content;
-                container.appendChild(noteEl);
+    const birds = new PageBirds(page, canvas, {
+        alignTo: page.querySelector(".name"),
+        cards: ".card",
+        year,
+        skyToggle: document.getElementById("sky-toggle"),
+        onMailLayout: ({ link, note: at }) => {
+            Object.assign(mail.style, {
+                left: `${link.x}px`,
+                top: `${link.y}px`,
+                width: `${link.w}px`,
+                height: `${link.h}px`,
+                clipPath: link.clip,
             });
+            note.style.left = `${at.x}px`;
+            note.style.top = `${at.y}px`;
+        },
+        onHover: (day, x, y) => {
+            if (!day) {
+                tip.hidden = true;
+                return;
+            }
+            const left = Math.max(TIP_HALF_WIDTH + 8, Math.min(page.clientWidth - TIP_HALF_WIDTH - 8, x));
+            tip.style.left = `${Math.round(left)}px`;
+            tip.style.top = `${Math.round(y) - 30}px`;
+            tip.textContent = contributionText(day);
+            tip.hidden = false;
+        },
+    });
+    birds.start();
 
-            stillPending.forEach((note) => {
-                const noteEl = document.createElement("div");
-                noteEl.className =
-                    "absolute pointer-events-auto bg-transparent border-none outline-none text-xs text-neutral-300 max-w-xs italic";
-                noteEl.style.left = `${note.xPercent * screenWidth}px`;
-                noteEl.style.top = `${note.yPercent * screenHeight}px`;
-                noteEl.textContent = `${note.content} (pending)`;
-                container.appendChild(noteEl);
-            });
-        } catch (error) {
-            console.error("Failed to load notes:", error);
-        }
+    for (const [type, hover] of [
+        ["mouseenter", true],
+        ["mouseleave", false],
+        ["focus", true],
+        ["blur", false],
+    ] as const) {
+        mail.addEventListener(type, () => birds.setMailHover(hover));
     }
 
-    function initializeNotes() {
-        let clickX, clickY;
-        let isInputActive = false;
-
-        const inputContainer = document.getElementById("note-input-container");
-        const input = document.getElementById("note-input");
-        const submitBtn = document.getElementById("note-submit");
-        const cancelBtn = document.getElementById("note-cancel");
-
-        const toggleBtn = document.getElementById("notes-toggle");
-        const toggleSpan = toggleBtn.querySelector("span");
-
-        if (!input) return;
-
-        toggleSpan.textContent = getNotesEnabled()
-            ? "[hide notes]"
-            : "[show notes]";
-
-        // Click anywhere to create note
-        document.addEventListener("click", (e) => {
-            // Don't create notes if notes are disabled
-            if (!getNotesEnabled()) {
-                return;
-            }
-
-            // If input is currently active, cancel it
-            if (isInputActive) {
-                finish();
-                return;
-            }
-
-            // Don't create note if clicking on interactive elements
-            if (
-                e.target.closest(
-                    "a, button, input, code, textarea, #notes-toggle, #notes-container",
-                )
-            ) {
-                return;
-            }
-
-            clickX = e.clientX;
-            clickY = e.clientY;
-
-            inputContainer.style.left = `${clickX}px`;
-            inputContainer.style.top = `${clickY}px`;
-            inputContainer.classList.remove("hidden");
-            input.focus();
-
-            isInputActive = true;
-        });
-
-        function finish() {
-            input.value = "";
-            inputContainer.classList.add("hidden");
-            isInputActive = false;
-        }
-
-        async function submit() {
-            const content = input.value.trim();
-            if (!content) return;
-
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
-
-            try {
-                const response = await fetch("/api/notes", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        content,
-                        x: clickX,
-                        y: clickY,
-                        screenWidth,
-                        screenHeight,
-                    }),
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    savePendingNote({
-                        id: result.id,
-                        content: content,
-                        xPercent: clickX / screenWidth,
-                        yPercent: clickY / screenHeight,
-                    });
-
-                    // Show the new pending note
-                    finish();
-                    loadNotes();
-
-                    // Make sure the input container is hidden before alerting
-                    setTimeout(() => alert("Note submitted for approval"), 0);
-                } else {
-                    alert("Failed to submit note");
-                }
-            } catch (error) {
-                alert("Error submitting note");
-            }
-        }
-
-        // Submit on Enter, cancel on Escape
-        input.addEventListener("keydown", async (e) => {
-            if (e.key === "Enter") {
-                await submit();
-            } else if (e.key === "Escape") {
-                finish();
-            }
-        });
-
-        submitBtn.addEventListener("click", submit);
-        cancelBtn.addEventListener("click", finish);
-        toggleBtn.addEventListener("click", () => {
-            const enabled = !getNotesEnabled();
-            toggleSpan.textContent = enabled ? "[hide notes]" : "[show notes]";
-
-            setNotesEnabled(enabled);
-
-            if (!enabled) {
-                // Hide any active input
-                finish();
-            }
-
-            // Reload notes
-            loadNotes();
-        });
-
-        // Adjust notes on window resize
-        window.addEventListener("resize", loadNotes);
-
-        loadNotes();
-    }
-
-    initializeNotes();
-    document.addEventListener("astro:after-swap", initializeNotes);
+    document.addEventListener("keydown", (e) => {
+        if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+        const t = e.target as HTMLElement | null;
+        if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+        const link = document.querySelector<HTMLAnchorElement>(`[data-key="${e.key.toLowerCase()}"]`);
+        if (!link) return;
+        e.preventDefault();
+        link.click();
+    });
 </script>
+
+<style>
+    .page {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        min-height: 640px;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    .birds {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+        pointer-events: none;
+        z-index: 3;
+    }
+
+    .cols {
+        position: absolute;
+        top: 0;
+        bottom: 104px;
+        right: 64px;
+        left: max(720px, 50%);
+        z-index: 2;
+        display: flex;
+        gap: 20px;
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0px, #000 160px, #000 calc(100% - 160px), transparent 100%);
+        mask-image: linear-gradient(to bottom, transparent 0px, #000 160px, #000 calc(100% - 160px), transparent 100%);
+    }
+
+    .col {
+        position: relative;
+        flex: 1 1 0;
+        min-width: 0;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    @keyframes scroll-up {
+        from {
+            transform: translate3d(0, 0, 0);
+        }
+        to {
+            transform: translate3d(0, -33.3333%, 0);
+        }
+    }
+
+    @keyframes scroll-left {
+        from {
+            transform: translate3d(0, 0, 0);
+        }
+        to {
+            transform: translate3d(-33.3333%, 0, 0);
+        }
+    }
+
+    .track {
+        animation-name: scroll-up;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+        will-change: transform;
+    }
+
+    .col:hover .track {
+        animation-play-state: paused;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .track {
+            animation: none;
+        }
+    }
+
+    .card {
+        margin: 0 0 16px;
+        color: var(--ink);
+        text-decoration: none;
+    }
+
+    .pr-state {
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--muted2);
+    }
+
+    .pr-state svg {
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .merged {
+        stroke: var(--merged);
+    }
+
+    .open {
+        stroke: var(--add);
+    }
+
+    .pr-title {
+        font-size: 15px;
+        line-height: 22px;
+        font-weight: 500;
+        color: var(--ink);
+    }
+
+    .pr-meta {
+        margin-top: 6px;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 11.5px;
+        line-height: 16px;
+        color: var(--muted2);
+    }
+
+    .pr-ref {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .pr-diff {
+        flex: none;
+    }
+
+    .add {
+        color: var(--add);
+    }
+
+    .del {
+        color: var(--del);
+    }
+
+    .label {
+        margin-bottom: 2px;
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--muted2);
+    }
+
+    .project-name {
+        font-family: "Pixelify Sans", ui-sans-serif, system-ui, sans-serif;
+        font-size: 26px;
+        line-height: 34px;
+        font-weight: 500;
+        color: var(--ink);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .project-desc {
+        margin-top: 4px;
+        font-size: 14px;
+        line-height: 21px;
+        color: var(--muted);
+    }
+
+    .mail {
+        position: absolute;
+        z-index: 4;
+        display: block;
+        cursor: pointer;
+    }
+
+    .mail:focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 3px;
+        border-radius: 2px;
+    }
+
+    .mailnote {
+        position: absolute;
+        left: -999px;
+        top: 0;
+        z-index: 4;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        line-height: 18px;
+        color: var(--ink2);
+        pointer-events: none;
+        white-space: nowrap;
+    }
+
+    .mailnote svg {
+        position: absolute;
+        left: -74px;
+        top: -14px;
+        fill: none;
+        stroke: var(--arrow);
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .mailnote kbd {
+        background: var(--key-bg);
+        color: var(--key-ink);
+        padding: 0 5px;
+        border-radius: 4px;
+        font-size: 12px;
+        line-height: 18px;
+    }
+
+    .tip {
+        position: absolute;
+        z-index: 5;
+        transform: translateX(-50%);
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: var(--tip);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 11.5px;
+        line-height: 16px;
+        color: var(--ink2);
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
+    .tip[hidden] {
+        display: none;
+    }
+
+    .main {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        padding: 160px 48px 0 clamp(24px, 6vw, 96px);
+    }
+
+    .intro {
+        width: 100%;
+        max-width: 520px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .heading {
+        margin: 0 0 4px;
+        display: flex;
+        align-items: baseline;
+        gap: 20px;
+        font-weight: 400;
+    }
+
+    .name {
+        display: block;
+        font-family: "Pixelify Sans", ui-sans-serif, system-ui, sans-serif;
+        font-size: 76px;
+        line-height: 96px;
+        font-weight: 500;
+        letter-spacing: 0;
+        color: var(--ink);
+    }
+
+    .telugu {
+        font-size: 20px;
+        line-height: 28px;
+        color: var(--faint);
+    }
+
+    .bio {
+        margin: 0;
+        font-size: 17px;
+        line-height: 28px;
+        color: var(--ink2);
+    }
+
+    .say {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 16px;
+        font-size: 14px;
+        line-height: 24px;
+        color: var(--faint);
+    }
+
+    .hi {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--muted);
+        text-decoration: underline;
+        text-decoration-color: var(--line);
+        text-underline-offset: 3px;
+    }
+
+    .hi:hover {
+        color: var(--ink);
+        text-decoration-color: var(--line-hover);
+    }
+
+    .bars {
+        display: inline-flex;
+        align-items: flex-end;
+        gap: 1px;
+        height: 10px;
+    }
+
+    .bar {
+        width: 3px;
+        background: var(--bar-off);
+    }
+
+    .bar-on {
+        background: #40c463;
+    }
+
+    .pages {
+        margin-top: 4px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 24px;
+        font-size: 14px;
+        line-height: 24px;
+    }
+
+    .nav {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--nav);
+        text-decoration: none;
+    }
+
+    .nav:hover {
+        color: var(--ink);
+    }
+
+    .nav:hover .nav-label {
+        text-decoration: underline;
+        text-decoration-color: var(--faint);
+        text-underline-offset: 3px;
+    }
+
+    .nav kbd {
+        background: var(--key-bg);
+        color: var(--key-ink);
+        padding: 1px 5px;
+        border-radius: 4px;
+        font-size: 12px;
+        line-height: 18px;
+    }
+
+    @media (max-width: 700px) {
+        .page {
+            height: auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main {
+            order: 1;
+            height: auto;
+            padding: 72px 20px 0;
+        }
+
+        .name {
+            font-size: 56px;
+            line-height: 72px;
+        }
+
+        .cols {
+            order: 2;
+            position: relative;
+            top: auto;
+            right: auto;
+            bottom: auto;
+            left: auto;
+            flex-direction: column;
+            gap: 16px;
+            margin: 40px 0 280px;
+            -webkit-mask-image: linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
+        }
+
+        .col {
+            flex: none;
+            height: auto;
+        }
+
+        .track {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            width: max-content;
+            animation-name: scroll-left;
+        }
+
+        .track .card {
+            flex: none;
+            width: 300px;
+            margin: 0;
+        }
+    }
+</style>

@@ -1,123 +1,42 @@
 ---
-import { ClientRouter } from "astro:transitions";
-
 import "@/styles/global.css";
-import Link from "@/components/Link.astro";
+
+interface Props {
+    title: string;
+}
 
 const { title } = Astro.props;
-
-// Get build info from environment variables
-const hash = import.meta.env.COMMIT_HASH;
-const buildDate = import.meta.env.BUILD_DATE || new Date().toISOString();
-
-const displayHash = hash?.slice(0, 7) || "dev";
-
-const repoUrl = "https://github.com/ap-1/anish.land";
-const commitUrl = hash ? `${repoUrl}/commit/${hash}` : "#";
 ---
 
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <link rel="icon" type="image/png" href="/favicon.png" />
-        <meta name="viewport" content="width=device-width" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+        <script is:inline>
+            {
+                const systemDark = matchMedia("(prefers-color-scheme: dark)");
+                const applyTheme = () => {
+                    document.documentElement.dataset.theme = localStorage.getItem("theme") ?? (systemDark.matches ? "dark" : "light");
+                };
+                applyTheme();
+                systemDark.addEventListener("change", applyTheme);
+            }
+        </script>
+
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Pixelify+Sans:wght@400..700&family=Geist+Mono:wght@100..900&display=swap"
             rel="stylesheet"
         />
-
-        <ClientRouter />
-        <title>{title}</title>
     </head>
-    <body class="font-serif w-screen h-screen overflow-hidden relative">
+    <body>
         <slot />
-
-        <footer
-            class="absolute bottom-4 left-4 text-xs text-neutral-500 font-mono"
-        >
-            commit <Link href={commitUrl} target="_blank">{displayHash}</Link> at
-            {buildDate} with <Link href="https://astro.build" target="_blank"
-                >{Astro.generator}</Link
-            > / copyright © 2025 <Link
-                href="https://github.com/ap-1"
-                target="_blank">ap-1</Link
-            >
-        </footer>
     </body>
 </html>
-
-<script is:inline>
-    let keyQueue = [];
-    let debounceTimeout;
-
-    function processKeyQueue() {
-        if (keyQueue.length === 0) return;
-
-        // Take the most recent intent
-        const targetUrl = keyQueue[keyQueue.length - 1];
-        keyQueue = [];
-
-        // Trigger view transition
-        const link = document.createElement("a");
-        link.href = targetUrl;
-        link.style.display = "none";
-        document.body.appendChild(link);
-
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    document.addEventListener("keydown", (event) => {
-        if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) {
-            return;
-        }
-
-        // Don't trigger navigation if user is typing in an input/textarea
-        if (
-            event.target.tagName === "INPUT" ||
-            event.target.tagName === "TEXTAREA"
-        ) {
-            return;
-        }
-
-        if (event.repeat) {
-            return; // Ignore repeated key presses
-        }
-
-        let targetUrl;
-        switch (event.key) {
-            case "a":
-                targetUrl = "/about";
-                break;
-            case "c":
-                targetUrl = "/contact";
-                break;
-            case "p":
-                targetUrl = "/projects";
-                break;
-            case "n":
-                // Toggle notes on home page only
-                if (window.location.pathname === "/") {
-                    const toggleBtn = document.getElementById("notes-toggle");
-                    if (toggleBtn) {
-                        toggleBtn.click();
-                    }
-                }
-
-                // Don't navigate anywhere
-                return;
-            default:
-                return;
-        }
-
-        keyQueue.push(targetUrl);
-
-        // Clear previous timeout and set new one
-        clearTimeout(debounceTimeout);
-        debounceTimeout = setTimeout(processKeyQueue, 5);
-    });
-</script>

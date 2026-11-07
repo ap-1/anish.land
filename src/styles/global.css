@@ -1,15 +1,145 @@
-@import "tailwindcss";
-
-/* iosevka-latin-400-normal */
-@font-face {
-    font-family: "Iosevka";
-    font-style: normal;
-    font-display: swap;
-    font-weight: 400;
-    src: url(https://cdn.jsdelivr.net/fontsource/fonts/iosevka@latest/latin-400-normal.woff2) format("woff2"), url(https://cdn.jsdelivr.net/fontsource/fonts/iosevka@latest/latin-400-normal.woff) format("woff");
+:root {
+    --bg: #ffffff;
+    --card: #fafafa;
+    --key: #f5f5f5;
+    --soft: #f2f2f2;
+    --ink: #171717;
+    --ink2: #262626;
+    --ink3: #404040;
+    --ink4: #525252;
+    --muted: #737373;
+    --muted2: #8a8a8a;
+    --faint: #a3a3a3;
+    --line: #d4d4d4;
+    --line2: #e5e5e5;
+    --ghost: #ececec;
+    --ghost-h: #e2e2e2;
+    --bar-off: #dcdcdc;
+    --link: #1c398e;
+    --arrow: #bdbdbd;
+    --add: #1a7f37;
+    --del: #c62f2f;
+    --merged: #8250df;
+    --tip: rgba(255,255,255,.92);
+    --postmark: rgba(38,38,70,.62);
+    --foot: #2f6b34;
+    --foot-a: #1d4f23;
+    --foot-hover: #123a17;
+    --foot-line: rgba(29,79,35,.35);
+    --foot-line-hover: rgba(29,79,35,.8);
+    --nav: var(--ink3);
+    --line-hover: var(--muted);
+    --key-bg: var(--key);
+    --key-ink: var(--ink4);
+    color-scheme: light;
 }
 
-@theme {
-    --font-mono: "Iosevka", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --font-serif: "Noto Serif", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+[data-theme="dark"] {
+    --bg: #0f1218;
+    --card: #181b21;
+    --key: #232831;
+    --soft: #1d2128;
+    --ink: #ececec;
+    --ink2: #d7d7d7;
+    --ink3: #c4c4c4;
+    --ink4: #b3b3b3;
+    --muted: #9b9fa6;
+    --muted2: #8b9098;
+    --faint: #6e737b;
+    --line: #3a3f49;
+    --line2: #2b3038;
+    --ghost: #232831;
+    --ghost-h: #2c323c;
+    --bar-off: #30353e;
+    --link: #9db7ff;
+    --arrow: #5d636d;
+    --add: #3fb950;
+    --del: #f85149;
+    --merged: #a371f7;
+    --tip: rgba(30,34,41,.96);
+    --postmark: rgba(205,210,235,.55);
+    --foot: #7fb887;
+    --foot-a: #a8dbb0;
+    --foot-hover: #d4f0d8;
+    --foot-line: rgba(168,219,176,.35);
+    --foot-line-hover: rgba(168,219,176,.8);
+    color-scheme: dark;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+}
+
+kbd {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 1em;
+}
+
+.card {
+    display: block;
+    box-sizing: border-box;
+    padding: 140px 18px 18px;
+    border-radius: 16px;
+    background-color: var(--card);
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: 320px 160px;
+    image-rendering: pixelated;
+}
+
+a.card:hover .card-title {
+    text-decoration: underline;
+    text-decoration-color: var(--faint);
+    text-underline-offset: 3px;
+}
+
+.scene-0 { background-image: url(/scenes/light/00-sunset.png); }
+.scene-1 { background-image: url(/scenes/light/01-clouds.png); }
+.scene-2 { background-image: url(/scenes/light/02-hills.png); }
+.scene-3 { background-image: url(/scenes/light/03-night.png); }
+.scene-4 { background-image: url(/scenes/light/04-mountains.png); }
+.scene-5 { background-image: url(/scenes/light/05-meadow.png); }
+.scene-6 { background-image: url(/scenes/light/06-sea.png); }
+.scene-7 { background-image: url(/scenes/light/07-blossom.png); }
+.scene-8 { background-image: url(/scenes/light/08-dunes.png); }
+.scene-9 { background-image: url(/scenes/light/09-lighthouse.png); }
+.scene-10 { background-image: url(/scenes/light/10-city.png); }
+.scene-11 { background-image: url(/scenes/light/11-sunflowers.png); }
+.scene-12 { background-image: url(/scenes/light/12-aurora.png); }
+.scene-13 { background-image: url(/scenes/light/13-winter.png); }
+.scene-14 { background-image: url(/scenes/light/14-autumn.png); }
+.scene-15 { background-image: url(/scenes/light/15-balloons.png); }
+.scene-16 { background-image: url(/scenes/light/16-planet.png); }
+.scene-17 { background-image: url(/scenes/light/17-reef.png); }
+.scene-18 { background-image: url(/scenes/light/18-rainbow.png); }
+.scene-19 { background-image: url(/scenes/light/19-campsite.png); }
+
+[data-theme="dark"] .scene-0 { background-image: url(/scenes/dark/00-sunset.png); }
+[data-theme="dark"] .scene-1 { background-image: url(/scenes/dark/01-clouds.png); }
+[data-theme="dark"] .scene-2 { background-image: url(/scenes/dark/02-hills.png); }
+[data-theme="dark"] .scene-3 { background-image: url(/scenes/dark/03-night.png); }
+[data-theme="dark"] .scene-4 { background-image: url(/scenes/dark/04-mountains.png); }
+[data-theme="dark"] .scene-5 { background-image: url(/scenes/dark/05-meadow.png); }
+[data-theme="dark"] .scene-6 { background-image: url(/scenes/dark/06-sea.png); }
+[data-theme="dark"] .scene-7 { background-image: url(/scenes/dark/07-blossom.png); }
+[data-theme="dark"] .scene-8 { background-image: url(/scenes/dark/08-dunes.png); }
+[data-theme="dark"] .scene-9 { background-image: url(/scenes/dark/09-lighthouse.png); }
+[data-theme="dark"] .scene-10 { background-image: url(/scenes/dark/10-city.png); }
+[data-theme="dark"] .scene-11 { background-image: url(/scenes/dark/11-sunflowers.png); }
+[data-theme="dark"] .scene-12 { background-image: url(/scenes/dark/12-aurora.png); }
+[data-theme="dark"] .scene-13 { background-image: url(/scenes/dark/13-winter.png); }
+[data-theme="dark"] .scene-14 { background-image: url(/scenes/dark/14-autumn.png); }
+[data-theme="dark"] .scene-15 { background-image: url(/scenes/dark/15-balloons.png); }
+[data-theme="dark"] .scene-16 { background-image: url(/scenes/dark/16-planet.png); }
+[data-theme="dark"] .scene-17 { background-image: url(/scenes/dark/17-reef.png); }
+[data-theme="dark"] .scene-18 { background-image: url(/scenes/dark/18-rainbow.png); }
+[data-theme="dark"] .scene-19 { background-image: url(/scenes/dark/19-campsite.png); }
+
+.pr-art {
+    background-image: var(--art-light);
+}
+
+[data-theme="dark"] .pr-art {
+    background-image: var(--art-dark);
 }

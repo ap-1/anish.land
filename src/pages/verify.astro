@@ -1,0 +1,324 @@
+---
+import Subpage from "@/layouts/Subpage.astro";
+import ageRecipientFile from "../../public/age-recipient.txt?raw";
+
+const ageRecipient = ageRecipientFile.trim();
+const ageShort = `${ageRecipient.slice(0, 18)} \u2026 ${ageRecipient.slice(-10)}`;
+
+const sshPublicKey =
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDwjDM2gTgro+aN81I65BFexfLXq1u/8AJ3PmCTX5X/a i@anish.land";
+const imessageCode = "APKTIDH19f6YF-u7Sg9qnTs9ubKP85zd2aTtZMZVgkXb6rVceJzw";
+const oldPgpHex = "2A0A16F5E026BE3BA47FB7A6841AFB689A5BACCB";
+
+function group(hex: string): string {
+    const groups = hex.toUpperCase().match(/.{1,4}/g) ?? [];
+    const half = Math.ceil(groups.length / 2);
+    return `${groups.slice(0, half).join(" ")}\n${groups.slice(half).join(" ")}`;
+}
+
+const pgpHex = "B89EA3F316A7411CB5B28A14B1CA832135A8C503";
+const pgpPqHex = "19612C81F277542600DA77CE332AB6327506A282A1E77D10E7D68203CFD7E7CE";
+
+const keys = [
+    {
+        name: "pgp",
+        role: "signing",
+        facts: [
+            ["signing", "ed25519"],
+            ["encryption", "cv25519"],
+            ["valid", "since 2026-02-06"],
+        ],
+        fpLabel: "fingerprint",
+        fp: group(pgpHex),
+        copyText: pgpHex,
+        copyLabel: "copy fingerprint",
+    },
+    {
+        name: "pgp (pq)",
+        role: "not in use yet",
+        facts: [
+            ["signing", "ml-dsa-65 + ed25519"],
+            ["encryption", "ml-kem-768 + x25519"],
+            ["valid", "2026-06-26 to 2029-06-26"],
+        ],
+        fpLabel: "fingerprint (v6)",
+        fp: group(pgpPqHex),
+        copyText: pgpPqHex,
+        copyLabel: "copy fingerprint",
+    },
+    {
+        name: "ssh",
+        role: "",
+        facts: [["algorithm", "ed25519"]],
+        fpLabel: "sha256 fingerprint",
+        fp: "SHA256:Itq/24vPBH0hvUzQqRaFKdpFYr5xsjbhfs+G/pqvDPE",
+        copyText: sshPublicKey,
+        copyLabel: "copy public key",
+    },
+];
+---
+
+<Subpage heading="verify">
+    <div class="sub">
+        <span>keys for <a class="soft mail" href="mailto:i@anish.land">i@anish.land</a></span>
+        <a class="soft" href="https://keyoxide.org/i@anish.land" target="_blank">identity proofs on keyoxide &nearr;</a>
+    </div>
+
+    <section aria-label="Current keys" class="keys">
+        {keys.map((k) => (
+            <div class="key-card">
+                <div class="head">
+                    <div class="title">
+                        <span class="name">{k.name}</span>
+                        <span class="role">{k.role}</span>
+                    </div>
+                    <button type="button" class="btn" data-copy={k.copyText} data-label={k.copyLabel}>
+                        {k.copyLabel}
+                    </button>
+                </div>
+                <dl class="facts">
+                    {k.facts.map(([term, value]) => (
+                        <>
+                            <dt>{term}</dt>
+                            <dd>{value}</dd>
+                        </>
+                    ))}
+                </dl>
+                <div class="label">{k.fpLabel}</div>
+                <div class="fingerprint">{k.fp}</div>
+            </div>
+        ))}
+
+        <div class="key-card">
+            <div class="head">
+                <div class="title">
+                    <span class="name">imessage</span>
+                    <a class="soft small" href="https://support.apple.com/118246" target="_blank">contact key verification &nearr;</a>
+                </div>
+                <button type="button" class="btn" data-copy={imessageCode} data-label="copy code">copy code</button>
+            </div>
+            <dl class="facts"><dt>account</dt><dd>i@anish.land</dd></dl>
+            <div class="label">public verification code</div>
+            <div class="fingerprint">{imessageCode}</div>
+        </div>
+
+        <div class="key-card">
+            <div class="head">
+                <div class="title">
+                    <span class="name">age</span>
+                    <a class="soft small" href="https://github.com/FiloSottile/age#recipient-files" target="_blank">encrypting files to me &nearr;</a>
+                </div>
+                <span class="actions">
+                    <button type="button" class="btn" data-copy={ageRecipient} data-label="copy recipient">copy recipient</button>
+                    <a class="btn" href="/age-recipient.txt" download="anish-age-recipient.txt">download .txt</a>
+                </span>
+            </div>
+            <div class="label">recipient</div>
+            <div class="fingerprint">{ageShort}</div>
+        </div>
+    </section>
+
+    <section aria-label="Previous keys" class="prev">
+        <details>
+            <summary>previous keys</summary>
+            <div class="key-card retired">
+                <div class="title">
+                    <span class="name retired-name">pgp</span>
+                    <span class="role">retired</span>
+                </div>
+                <dl class="facts">
+                    <dt>algorithm</dt><dd>rsa-4096</dd>
+                    <dt>valid</dt><dd>2023-04-11 to 2026-02-06</dd>
+                </dl>
+                <div class="label">fingerprint</div>
+                <div class="fingerprint">{group(oldPgpHex)}</div>
+            </div>
+        </details>
+    </section>
+</Subpage>
+
+<script>
+    const buttons = document.querySelectorAll<HTMLButtonElement>(".btn[data-copy]");
+    for (const button of buttons) {
+        button.addEventListener("click", () => {
+            navigator.clipboard.writeText(button.dataset.copy ?? "").catch(() => {});
+            for (const other of buttons) other.textContent = other.dataset.label ?? "";
+            button.textContent = "copied";
+        });
+    }
+</script>
+
+<style>
+    .sub {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 6px 16px;
+        font-size: 15px;
+        line-height: 24px;
+        color: var(--muted);
+    }
+
+    .soft,
+    .btn {
+        color: var(--muted);
+        text-decoration: underline;
+        text-decoration-color: var(--line);
+        text-underline-offset: 3px;
+    }
+
+    .soft:hover,
+    .btn:hover {
+        color: var(--ink);
+        text-decoration-color: var(--muted);
+    }
+
+    .mail {
+        color: var(--ink);
+    }
+
+    .small {
+        font-size: 12px;
+        line-height: 16px;
+    }
+
+    .btn {
+        border: 0;
+        background: transparent;
+        padding: 0;
+        font: inherit;
+        font-size: 12px;
+        line-height: 16px;
+        cursor: pointer;
+    }
+
+    .keys {
+        margin-top: 36px;
+        max-width: 1040px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+        gap: 16px;
+    }
+
+    .key-card {
+        padding: 20px 22px;
+        border-radius: 16px;
+        background: var(--card);
+    }
+
+    .head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .title {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+    }
+
+    .name {
+        font-size: 16px;
+        line-height: 24px;
+        font-weight: 600;
+    }
+
+    .role {
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--muted2);
+    }
+
+    .actions {
+        display: inline-flex;
+        gap: 14px;
+    }
+
+    .facts {
+        margin: 12px 0 0;
+        display: grid;
+        grid-template-columns: 84px 1fr;
+        gap: 4px 12px;
+        font-size: 13px;
+        line-height: 20px;
+    }
+
+    .facts dt {
+        color: var(--faint);
+    }
+
+    .facts dd {
+        margin: 0;
+        color: var(--ink3);
+    }
+
+    .label {
+        margin-top: 14px;
+        font-size: 11px;
+        line-height: 16px;
+        color: var(--faint);
+    }
+
+    .fingerprint {
+        margin-top: 2px;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 14px;
+        line-height: 22px;
+        color: var(--ink2);
+        white-space: pre-line;
+        word-break: break-all;
+    }
+
+    .prev {
+        margin-top: 32px;
+        max-width: 1040px;
+    }
+
+    summary {
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 22px;
+        color: var(--muted);
+    }
+
+    .retired {
+        margin-top: 12px;
+        color: var(--muted);
+    }
+
+    .retired .retired-name {
+        font-size: 15px;
+        line-height: 22px;
+        color: var(--ink4);
+    }
+
+    .retired .facts dd {
+        color: var(--muted);
+    }
+
+    .retired .fingerprint {
+        color: var(--muted2);
+    }
+
+    @media (max-width: 700px) {
+        .keys {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .head {
+            flex-wrap: wrap;
+        }
+
+        .key-card {
+            padding: 18px;
+        }
+
+        .fingerprint {
+            font-size: 13px;
+            line-height: 20px;
+        }
+    }
+</style>

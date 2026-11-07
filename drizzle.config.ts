@@ -1,3 +1,4 @@
+import process from "node:process";
 import type { Config } from "drizzle-kit";
 
 const { CLOUDFLARE_ACCOUNT_ID, DB_ID, D1_TOKEN } = process.env;

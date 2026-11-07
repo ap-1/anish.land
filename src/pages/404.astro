@@ -1,0 +1,140 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Footer from "@/components/Footer.astro";
+import SkyToggle from "@/components/SkyToggle.astro";
+---
+
+<Layout title={"anish.land \u2014 not found"}>
+    <div id="page" class="root">
+        <canvas id="birds" class="birds" aria-hidden="true"></canvas>
+        <SkyToggle />
+        <main class="main">
+            <a class="back-link" href="/" aria-keyshortcuts="Escape"><span>&larr; anish</span><kbd data-perch="box">esc</kbd></a>
+            <h1 class="heading"><span data-perch="text">404</span></h1>
+        </main>
+        <Footer ground />
+    </div>
+</Layout>
+
+<script>
+    import { PageBirds } from "@/lib/birds";
+    import type { ContributionDay } from "@/lib/github";
+
+    const DAY_MS = 86_400_000;
+
+    function sparseGrass(): ContributionDay[] {
+        let seed = 7;
+        const random = () => {
+            seed = (seed * 1664525 + 1013904223) % 4294967296;
+            return seed / 4294967296;
+        };
+        const today = Date.now();
+        return Array.from({ length: 365 }, (_, d) => {
+            const x = random();
+            return {
+                date: new Date(today - (364 - d) * DAY_MS).toISOString().slice(0, 10),
+                level: x < 0.55 ? 0 : x < 0.85 ? 1 : 2,
+                count: 0,
+            };
+        });
+    }
+
+    const page = document.getElementById("page")!;
+    const canvas = document.getElementById("birds") as HTMLCanvasElement;
+    new PageBirds(page, canvas, { mailbox: false, year: sparseGrass(), skyToggle: document.getElementById("sky-toggle") }).start();
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        e.preventDefault();
+        document.querySelector<HTMLAnchorElement>(".back-link")?.click();
+    });
+</script>
+
+<style>
+    .root {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        min-height: 480px;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    .birds {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+        pointer-events: none;
+        z-index: 3;
+    }
+
+    .main {
+        position: relative;
+        z-index: 1;
+        box-sizing: border-box;
+        padding: 64px 64px 0 clamp(24px, 6vw, 96px);
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        line-height: 20px;
+        color: var(--muted);
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        color: var(--ink2);
+    }
+
+    .back-link kbd {
+        background: var(--key);
+        color: var(--ink4);
+        padding: 1px 5px;
+        border-radius: 4px;
+        font-size: 12px;
+        line-height: 18px;
+    }
+
+    .heading {
+        margin: 56px 0 0;
+        font-weight: 400;
+    }
+
+    .heading span {
+        display: inline-block;
+        font-family: "Pixelify Sans", ui-sans-serif, system-ui, sans-serif;
+        font-size: 56px;
+        line-height: 68px;
+        font-weight: 500;
+        color: var(--ink);
+    }
+
+    @media (max-width: 700px) {
+        .root {
+            height: auto;
+            min-height: 100vh;
+        }
+
+        .main {
+            padding: 40px 20px 260px;
+        }
+
+        .heading {
+            margin-top: 40px;
+        }
+
+        .heading span {
+            font-size: 44px;
+            line-height: 56px;
+        }
+    }
+</style>

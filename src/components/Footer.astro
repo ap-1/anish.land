@@ -1,0 +1,78 @@
+---
+import { BUILD_DATE, COMMIT_HASH } from "astro:env/server";
+
+interface Props {
+    ground?: boolean;
+}
+
+const { ground = false } = Astro.props;
+
+const built = BUILD_DATE ? Temporal.Instant.from(BUILD_DATE) : Temporal.Now.instant();
+const builtUtc = built.toZonedDateTimeISO("UTC");
+
+const day = builtUtc.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric" });
+const time = builtUtc.toLocaleString("en-US", { hour: "numeric", minute: "2-digit" });
+const builtText = `${day} at ${time.replace(/\s/g, "")} utc`.toLowerCase();
+
+const repoUrl = "https://github.com/ap-1/anish.land";
+---
+
+<footer class:list={["footer", "footer-pos", { "ground": ground }]}>
+    commit {COMMIT_HASH ? <a href={`${repoUrl}/commit/${COMMIT_HASH}`} target="_blank">{COMMIT_HASH.slice(0, 7)}</a> : "dev"} on
+    <time datetime={built.toString()} title={built.toString()}>{builtText}</time> / copyright
+    &copy; {builtUtc.year} <a href="https://github.com/ap-1" target="_blank">ap-1</a>
+</footer>
+
+<style>
+    .footer-pos {
+        position: absolute;
+        z-index: 4;
+        bottom: 40px;
+        left: clamp(24px, 6vw, 96px);
+        font-size: 13px;
+        line-height: 20px;
+    }
+
+    .footer {
+        color: var(--faint);
+    }
+
+    .footer a {
+        color: var(--muted);
+        text-decoration: underline;
+        text-decoration-color: var(--line);
+        text-underline-offset: 3px;
+    }
+
+    .footer a:hover {
+        color: var(--ink2);
+        text-decoration-color: var(--muted);
+    }
+
+    .ground {
+        color: var(--foot);
+    }
+
+    .ground a {
+        color: var(--foot-a);
+        text-decoration-color: var(--foot-line);
+    }
+
+    .ground a:hover {
+        color: var(--foot-hover);
+        text-decoration-color: var(--foot-line-hover);
+    }
+
+    @media (max-width: 700px) {
+        .footer-pos {
+            left: 20px;
+            right: 20px;
+            bottom: 32px;
+            font-size: 12px;
+        }
+
+        .ground {
+            bottom: 24px;
+        }
+    }
+</style>

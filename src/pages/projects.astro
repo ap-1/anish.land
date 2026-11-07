@@ -1,8 +1,55 @@
 ---
-import Page from "@/layouts/Page.astro";
+import Subpage from "@/layouts/Subpage.astro";
+import { getProjects } from "@/lib/content";
+
+export const prerender = false;
+
+const projects = await getProjects(Astro.locals.runtime.env.DB);
 ---
 
-<Page>
-    <h1 class="text-2xl pt-4">projects</h1>
-    <p class="text-sm text-neutral-500">todo</p>
-</Page>
+<Subpage heading="projects" padBottom={120}>
+    <section aria-label="Projects" class="grid">
+        {projects.map((p, i) => (
+            <a href={p.url} target="_blank" class={`card scene-${(i * 7 + 1) % 20}`}>
+                <div class="kind">project</div>
+                <div class="card-title name">{p.name}</div>
+                <div class="desc">{p.description}</div>
+            </a>
+        ))}
+    </section>
+</Subpage>
+
+<style>
+    .grid {
+        margin-top: 40px;
+        max-width: 1040px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .kind {
+        margin-bottom: 2px;
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--muted2);
+    }
+
+    .name {
+        font-family: "Pixelify Sans", ui-sans-serif, system-ui, sans-serif;
+        font-size: 26px;
+        line-height: 34px;
+        font-weight: 500;
+        color: var(--ink);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .desc {
+        margin-top: 4px;
+        font-size: 14px;
+        line-height: 21px;
+        color: var(--muted);
+    }
+</style>

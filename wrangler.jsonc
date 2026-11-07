@@ -1,22 +1,32 @@
 {
     "$schema": "node_modules/wrangler/config-schema.json",
     "name": "anish-land",
+    "account_id": "1aeefdcd08c221dbe83c20913cc21c50",
     "compatibility_date": "2025-07-28",
+    "compatibility_flags": ["temporal"],
     "main": "./dist/_worker.js",
+    "secrets": {
+        "required": ["GITHUB_TOKEN"]
+    },
     "assets": {
         "directory": "./dist",
+        "binding": "ASSETS"
     },
     "observability": {
         "enabled": true
     },
     "send_metrics": false,
+    "triggers": {
+        // sync GitHub contributions and pull requests every hour
+        "crons": ["0 * * * *"]
+    },
     "d1_databases": [
         {
             "binding": "DB",
             "database_name": "notes-db",
             "database_id": "e9ca26c3-af8a-48fb-831e-1b2cc92af32b",
             "migrations_dir": "./src/db/migrations",
-            "experimental_remote": true
+            "remote": true
         }
     ]
 }

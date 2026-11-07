@@ -1,0 +1,641 @@
+---
+import Subpage from "@/layouts/Subpage.astro";
+import { SCENES, getPostcards } from "@/lib/content";
+
+export const prerender = false;
+
+const postcards = await getPostcards(Astro.locals.runtime.env.DB);
+const openingScene = Math.floor(Math.random() * SCENES.length);
+
+const wall = postcards.map(({ id, content, scene, date }) => ({
+    id,
+    content,
+    scene,
+    date: `${date.toLocaleString("en-US", { month: "short" }).toLowerCase()} ${date.day} ${date.year}`,
+    tilt: `${(((id * 37) % 5) - 2) * 0.6}deg`,
+}));
+---
+
+<Subpage heading="postcards">
+    <section aria-label="Postcards" class="grid" data-scene={openingScene} data-scenes={JSON.stringify(SCENES)}>
+        <div class={`postcard new front scene-${openingScene}`}>
+            <div class="front-in">
+                <div>
+                    <div class="greet">greetings from</div>
+                    <div class="title">anish.land</div>
+                </div>
+                <div class="front-btn">
+                    <button type="button" class="send turn-over">write a message &#8635;</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="postcard new back" hidden>
+            <div class="msg">
+                <textarea class="input" aria-label="Your postcard" maxlength="80" rows="5"></textarea>
+                <div class="sent-text" hidden></div>
+                <div class="msg-foot">
+                    <button type="button" class="ghost turn-back">&#8635; front</button>
+                    <span class="count">at least 5 characters</span>
+                </div>
+            </div>
+            <div class="divider"></div>
+            <div class="address">
+                <div class="stamp-slot">
+                    <div class="stamp" aria-hidden="true"><div class="stamp-face"></div></div>
+                    <div class="postmark" aria-hidden="true" hidden>
+                        <div class="pm-ring">ANISH.LAND<br /><span class="pm-day"></span><br /><span class="pm-year"></span></div>
+                        <svg width="74" height="40" viewBox="0 0 74 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                            <path d="M2 6 q 9 -5 18 0 t 18 0 t 18 0 t 18 0"></path>
+                            <path d="M2 15 q 9 -5 18 0 t 18 0 t 18 0 t 18 0"></path>
+                            <path d="M2 24 q 9 -5 18 0 t 18 0 t 18 0 t 18 0"></path>
+                            <path d="M2 33 q 9 -5 18 0 t 18 0 t 18 0 t 18 0"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="to">to</div>
+                <div class="to-name">anish.land</div>
+                <div class="send-area">
+                    <p class="error" role="alert" hidden></p>
+                    <button type="button" class="send send-btn" disabled>send</button>
+                    <div class="sent-note" hidden>sent, waiting for approval</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sheetcell">
+            <div class="sheet-head">
+                <span class="scene-name">{SCENES[openingScene]}</span>
+                <div class="arrows">
+                    <button type="button" class="arrow prev" aria-label="Previous picture" aria-keyshortcuts="ArrowLeft">&lsaquo;</button>
+                    <button type="button" class="arrow next" aria-label="Next picture" aria-keyshortcuts="ArrowRight">&rsaquo;</button>
+                </div>
+            </div>
+            <div class="sheet" role="radiogroup" aria-label="Postcard picture">
+                {SCENES.map((name, i) => (
+                    <button
+                        type="button"
+                        role="radio"
+                        aria-checked={i === openingScene ? "true" : "false"}
+                        aria-label={name}
+                        title={name}
+                        class="sheet-stamp"
+                    >
+                        <span style={`background-image: url(/stamps/${String(i).padStart(2, "0")}-${name}.png)`}></span>
+                    </button>
+                ))}
+            </div>
+        </div>
+
+        {wall.map((p) => (
+            <div class={`postcard small wall-card scene-${p.scene}`} style={`transform: rotate(${p.tilt})`}>
+                <div class="wall-text">{p.content}</div>
+                <div class="wall-date">{p.date}</div>
+            </div>
+        ))}
+    </section>
+</Subpage>
+
+<script>
+    const MIN = 5;
+    const MAX = 80;
+
+    const grid = document.querySelector<HTMLElement>(".grid")!;
+    const scenes: string[] = JSON.parse(grid.dataset.scenes!);
+    let scene = Number(grid.dataset.scene);
+
+    const $ = <T extends HTMLElement>(selector: string) => grid.querySelector<T>(selector)!;
+    const front = $(".front");
+    const back = $(".back");
+    const input = $<HTMLTextAreaElement>(".input");
+    const count = $(".count");
+    const sendBtn = $<HTMLButtonElement>(".send-btn");
+    const error = $(".error");
+    const sceneName = $(".scene-name");
+    const stamps = [...grid.querySelectorAll<HTMLButtonElement>(".sheet-stamp")];
+
+    function setScene(next: number) {
+        front.classList.remove(`scene-${scene}`);
+        scene = (next + scenes.length) % scenes.length;
+        front.classList.add(`scene-${scene}`);
+        sceneName.textContent = scenes[scene];
+        stamps.forEach((stamp, i) => stamp.setAttribute("aria-checked", String(i === scene)));
+    }
+
+    function showSide(side: "front" | "back") {
+        front.hidden = side !== "front";
+        back.hidden = side !== "back";
+    }
+
+    $(".prev").addEventListener("click", () => setScene(scene - 1));
+    $(".next").addEventListener("click", () => setScene(scene + 1));
+    stamps.forEach((stamp, i) => stamp.addEventListener("click", () => setScene(i)));
+
+    document.addEventListener("keydown", (e) => {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target as HTMLElement | null;
+        if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+        if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            setScene(scene - 1);
+        } else if (e.key === "ArrowRight") {
+            e.preventDefault();
+            setScene(scene + 1);
+        }
+    });
+
+    $(".turn-over").addEventListener("click", () => {
+        showSide("back");
+        input.focus();
+    });
+    $(".turn-back").addEventListener("click", () => showSide("front"));
+
+    const tooShort = () => [...input.value.trim()].length < MIN;
+
+    input.addEventListener("input", () => {
+        count.textContent = tooShort() ? `at least ${MIN} characters` : `${[...input.value].length}/${MAX}`;
+        sendBtn.disabled = tooShort();
+        error.hidden = true;
+    });
+
+    sendBtn.addEventListener("click", async () => {
+        if (tooShort()) return;
+        sendBtn.disabled = true;
+        error.hidden = true;
+        try {
+            const res = await fetch("/api/notes", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: input.value.trim(), scene }),
+            });
+            if (res.status !== 201) {
+                const body = (await res.json().catch(() => null)) as { error?: string } | null;
+                throw new Error(body?.error ?? "couldn't send, try again");
+            }
+        } catch (err) {
+            error.textContent = err instanceof Error ? err.message.toLowerCase() : "couldn't send, try again";
+            error.hidden = false;
+            sendBtn.disabled = false;
+            return;
+        }
+
+        const now = new Date();
+        $(".pm-day").textContent = now
+            .toLocaleString("en-US", { month: "short", day: "numeric" })
+            .toUpperCase();
+        $(".pm-year").textContent = String(now.getFullYear());
+        const sentText = $(".sent-text");
+        sentText.textContent = input.value;
+        sentText.hidden = false;
+        input.hidden = true;
+        count.hidden = true;
+        sendBtn.hidden = true;
+        $(".postmark").hidden = false;
+        $(".sent-note").hidden = false;
+    });
+</script>
+
+<style>
+    [hidden] {
+        display: none !important;
+    }
+
+    .grid {
+        margin-top: 40px;
+        max-width: 1240px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 36px 28px;
+    }
+
+    .postcard {
+        box-sizing: border-box;
+        border-radius: 10px;
+        background-color: var(--card);
+        background-repeat: no-repeat;
+        background-position: center top;
+        image-rendering: pixelated;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 8px 20px -12px rgba(0, 0, 0, 0.14);
+    }
+
+    .new {
+        grid-column: span 2;
+        grid-row: span 2;
+        transform: rotate(-0.8deg);
+    }
+
+    .front {
+        position: relative;
+        overflow: hidden;
+        background-size: 640px 320px;
+        min-height: 360px;
+    }
+
+    .front-in {
+        position: absolute;
+        left: 28px;
+        right: 28px;
+        bottom: 24px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px 24px;
+    }
+
+    .greet {
+        font-size: 14px;
+        line-height: 20px;
+        color: var(--muted);
+    }
+
+    .title {
+        font-family: "Pixelify Sans", ui-sans-serif, system-ui, sans-serif;
+        font-size: 56px;
+        line-height: 64px;
+        font-weight: 600;
+    }
+
+    .front-btn {
+        padding-bottom: 6px;
+    }
+
+    .back {
+        padding: 26px 28px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 1px 200px;
+        gap: 26px;
+    }
+
+    .msg {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .input {
+        flex: 1;
+        width: 100%;
+        box-sizing: border-box;
+        resize: none;
+        border: 0;
+        padding: 0;
+        background: repeating-linear-gradient(to bottom, transparent 0 31px, var(--line2) 31px 32px);
+        font: inherit;
+        font-size: 17px;
+        line-height: 32px;
+        color: var(--ink);
+        outline: none;
+    }
+
+    .input:focus-visible {
+        background: repeating-linear-gradient(to bottom, transparent 0 31px, var(--faint) 31px 32px);
+    }
+
+    .sent-text {
+        flex: 1;
+        background: repeating-linear-gradient(to bottom, transparent 0 31px, var(--line2) 31px 32px);
+        font-size: 17px;
+        line-height: 32px;
+        color: var(--ink);
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .msg-foot {
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .count {
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 12px;
+        color: var(--faint);
+    }
+
+    .divider {
+        background: var(--line2);
+    }
+
+    .address {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stamp-slot {
+        position: relative;
+        height: 100px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .stamp {
+        width: 82px;
+        height: 100px;
+        box-sizing: border-box;
+        padding: 5px;
+        background: #ffffff;
+        filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.18));
+        -webkit-mask: linear-gradient(#000 0 0) content-box, radial-gradient(circle at 4px 4px, transparent 2.4px, #000 2.6px) -1px -1px / 8px 8px;
+        mask: linear-gradient(#000 0 0) content-box, radial-gradient(circle at 4px 4px, transparent 2.4px, #000 2.6px) -1px -1px / 8px 8px;
+    }
+
+    .stamp-face {
+        width: 100%;
+        height: 100%;
+        background: url(/stamps/site-stamp.png) no-repeat 0 0 / 100% 100%;
+        image-rendering: pixelated;
+    }
+
+    .postmark {
+        position: absolute;
+        top: 38px;
+        right: -4px;
+        display: flex;
+        align-items: center;
+        color: var(--postmark);
+        transform: rotate(-10deg);
+        transform-origin: 30% 50%;
+        animation: thunk 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+        pointer-events: none;
+    }
+
+    .pm-ring {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        box-shadow: inset 0 0 0 1.6px currentColor;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 8.5px;
+        line-height: 11px;
+        text-align: center;
+    }
+
+    @keyframes thunk {
+        0% {
+            opacity: 0;
+            transform: rotate(-16deg) scale(1.35);
+        }
+        55% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 1;
+            transform: rotate(-10deg) scale(1);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .postmark {
+            animation: none;
+        }
+    }
+
+    .to {
+        margin-top: 20px;
+        font-size: 12px;
+        line-height: 16px;
+        color: var(--muted2);
+    }
+
+    .to-name {
+        font-family: "Pixelify Sans", ui-sans-serif, system-ui, sans-serif;
+        font-size: 26px;
+        line-height: 34px;
+        font-weight: 500;
+    }
+
+    .send-area {
+        margin-top: auto;
+    }
+
+    .error {
+        margin: 0 0 8px;
+        font-size: 13px;
+        line-height: 20px;
+        color: var(--del);
+    }
+
+    .sent-note {
+        font-size: 13px;
+        line-height: 20px;
+        color: var(--muted);
+    }
+
+    .send {
+        border: 0;
+        border-radius: 999px;
+        padding: 8px 16px;
+        background: var(--ink);
+        color: var(--bg);
+        font: inherit;
+        font-size: 13px;
+        line-height: 18px;
+        cursor: pointer;
+    }
+
+    .send:disabled {
+        background: var(--line);
+        cursor: default;
+    }
+
+    .ghost {
+        border: 0;
+        border-radius: 999px;
+        padding: 8px 16px;
+        background: var(--ghost);
+        color: var(--ink);
+        font: inherit;
+        font-size: 13px;
+        line-height: 18px;
+        cursor: pointer;
+    }
+
+    .ghost:hover {
+        background: var(--ghost-h);
+    }
+
+    .sheetcell {
+        grid-column: span 2;
+        box-sizing: border-box;
+        padding: 16px 20px 18px;
+        border-radius: 10px;
+        background: var(--card);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .sheet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .arrows {
+        display: flex;
+        gap: 6px;
+    }
+
+    .scene-name {
+        font-family: "Pixelify Sans", ui-sans-serif, system-ui, sans-serif;
+        font-size: 20px;
+        line-height: 26px;
+        font-weight: 500;
+        color: var(--ink);
+    }
+
+    .arrow {
+        width: 26px;
+        height: 26px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--ghost);
+        color: var(--ink3);
+        font: inherit;
+        font-size: 15px;
+        line-height: 26px;
+        cursor: pointer;
+    }
+
+    .arrow:hover {
+        background: var(--ghost-h);
+        color: var(--ink);
+    }
+
+    .sheet {
+        display: grid;
+        grid-template-columns: repeat(10, 40px);
+        justify-content: space-between;
+        gap: 10px 0;
+    }
+
+    .sheet-stamp {
+        width: 40px;
+        height: 50px;
+        padding: 4px;
+        border: 0;
+        cursor: pointer;
+        background: #ffffff;
+        filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.16));
+        -webkit-mask: linear-gradient(#000 0 0) content-box, radial-gradient(circle at 3px 3px, transparent 1.8px, #000 2px) -1px -1px / 6px 6px;
+        mask: linear-gradient(#000 0 0) content-box, radial-gradient(circle at 3px 3px, transparent 1.8px, #000 2px) -1px -1px / 6px 6px;
+        transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.18s ease;
+        opacity: 0.7;
+    }
+
+    .sheet-stamp:hover {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
+
+    .sheet-stamp[aria-checked="true"] {
+        opacity: 1;
+        transform: translateY(-4px) rotate(-5deg);
+    }
+
+    .sheet-stamp > span {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        image-rendering: pixelated;
+    }
+
+    .small {
+        aspect-ratio: 520 / 330;
+        padding: 100px 18px 14px;
+        background-size: 320px 160px;
+        background-position: center -24px;
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+    }
+
+    .wall-card {
+        transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .wall-card:hover {
+        transform: rotate(0deg) translateY(-3px) !important;
+    }
+
+    .wall-text {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: 15px;
+        line-height: 21px;
+        color: var(--ink);
+        word-break: break-word;
+    }
+
+    .wall-date {
+        flex: none;
+        font-family: "Geist Mono", ui-monospace, monospace;
+        font-size: 11px;
+        line-height: 21px;
+        color: var(--faint);
+    }
+
+    @media (max-width: 700px) {
+        .new,
+        .sheetcell {
+            grid-column: 1 / -1;
+            grid-row: auto;
+        }
+
+        .front {
+            aspect-ratio: 4 / 3;
+            background-size: 320px 160px;
+            min-height: 0;
+        }
+
+        .front-in {
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .front-btn {
+            padding-bottom: 0;
+        }
+
+        .title {
+            font-size: 36px;
+            line-height: 42px;
+        }
+
+        .back {
+            grid-template-columns: minmax(0, 1fr);
+            padding: 20px;
+            gap: 18px;
+        }
+
+        .divider {
+            display: none;
+        }
+
+        .sheet {
+            grid-template-columns: repeat(5, 40px);
+            gap: 14px 0;
+        }
+
+        .small {
+            aspect-ratio: auto;
+            padding-top: 120px;
+        }
+    }
+</style>
